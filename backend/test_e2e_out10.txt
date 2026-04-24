@@ -1,0 +1,135 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0 -- D:\jay\ai\antigravity\manager-ec\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\jay\ai\antigravity\manager-ec\backend
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+tests/test_e2e.py::test_full_business_workflow FAILED
+
+================================== FAILURES ===================================
+_________________________ test_full_business_workflow _________________________
+
+    def test_full_business_workflow():
+        test_id = uuid.uuid4().hex[:6]
+        payload = {
+            "email": f"e2e_user_{test_id}@mososhop.tw",
+            "password": "securepassword",
+            "name": "E2E Tester"
+        }
+    
+        # 1. 測試會員註冊
+        resp_reg = client.post("/users/register", json=payload)
+        # 若被建立過則略過
+        if resp_reg.status_code == 200:
+            assert resp_reg.json()["email"] == payload["email"]
+    
+        # 2. 測試登入
+        resp_login = client.post("/users/login", json={"email": payload["email"], "password": payload["password"]})
+        assert resp_login.status_code == 200
+        token = resp_login.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+    
+        # 3. 測試獲取使用者與錢包狀態
+        resp_me = client.get("/users/me", headers=headers)
+        assert resp_me.status_code == 200
+        user_data = resp_me.json()
+        assert user_data.get("vip_expires_at") is None # 初始非 VIP
+    
+        resp_wallet = client.get("/wallets/me", headers=headers)
+        assert resp_wallet.status_code == 200
+        wallet_data = resp_wallet.json()
+        assert wallet_data["cash_balance"] == 0
+        assert wallet_data["moso_coin"] == 0
+    
+        # 4. 測試 1000 元儲值 => 免年費 VIP
+        resp_deposit = client.post("/wallets/deposit", json={"amount": 1000}, headers=headers)
+        assert resp_deposit.status_code == 200
+    
+        resp_me2 = client.get("/users/me", headers=headers)
+        user_data2 = resp_me2.json()
+        assert user_data2.get("vip_expires_at") is not None # 已經變為 VIP
+    
+        # 5. 測試購物與回饋機制
+        # 查詢商品
+        resp_prods = client.get("/products")
+        assert resp_prods.status_code == 200
+        products = resp_prods.json()
+        test_prod = next(p for p in products if p["sku"] == "TEST-SKU-001")
+    
+        order_payload = {
+            "items": [
+                {"product_id": test_prod["id"], "quantity": 1} # 價格 2000
+            ],
+            "use_moso_coin": 0,
+            "payment_method": "ecpay"
+        }
+        resp_order = client.post("/orders", json=order_payload, headers=headers)
+        assert resp_order.status_code == 200
+        order_data = resp_order.json()
+        assert order_data["total_amount"] == 2000
+        assert order_data["final_paid"] == 2000
+        assert order_data["moso_coin_used"] == 0
+        assert order_data["reward_moso_coin"] == 200 # 2000 * 10%
+    
+        # 檢查錢包 Moso 幣是否增加
+        resp_wallet2 = client.get("/wallets/me", headers=headers)
+        assert resp_wallet2.json()["moso_coin"] == 200
+    
+        # 6. 使用 Moso 幣折抵購物
+        order_payload2 = {
+            "items": [
+                {"product_id": test_prod["id"], "quantity": 1} # 價格 2000
+            ],
+            "use_moso_coin": 200, # 使用剛賺到的 200 Moso Coin
+            "payment_method": "ecpay"
+        }
+        resp_order2 = client.post("/orders", json=order_payload2, headers=headers)
+>       assert resp_order2.status_code == 200
+E       assert 422 == 200
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+tests\test_e2e.py:125: AssertionError
+============================== warnings summary ===============================
+schemas\user.py:13
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\user.py:13: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(UserBase):
+
+schemas\wallet.py:9
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\wallet.py:9: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class WalletResponse(WalletBase):
+
+schemas\wallet.py:17
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\wallet.py:17: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class WalletTransactionResponse(BaseModel):
+
+schemas\order.py:14
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\order.py:14: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class OrderItemResponse(BaseModel):
+
+schemas\order.py:24
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\order.py:24: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class OrderResponse(BaseModel):
+
+schemas\external_affiliate.py:10
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\external_affiliate.py:10: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ExternalAffiliateResponse(ExternalAffiliateCreate):
+
+schemas\product.py:17
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\product.py:17: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ProductResponse(ProductBase):
+
+tests/test_e2e.py::test_full_business_workflow
+  D:\jay\ai\antigravity\manager-ec\backend\.venv\Lib\site-packages\jwt\api_jwt.py:147: InsecureKeyLengthWarning: The HMAC key is 29 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/test_e2e.py::test_full_business_workflow
+  D:\jay\ai\antigravity\manager-ec\backend\.venv\Lib\site-packages\jwt\api_jwt.py:365: InsecureKeyLengthWarning: The HMAC key is 29 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    decoded = self.decode_complete(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_e2e.py::test_full_business_workflow - assert 422 == 200
+======================== 1 failed, 9 warnings in 3.68s ========================

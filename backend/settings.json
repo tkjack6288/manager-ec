@@ -1,0 +1,9 @@
+{
+  "site_name": "Mososhop",
+  "maintenance_mode": true,
+  "reward_percentage": 10,
+  "free_shipping_threshold": 999,
+  "free_shipping_threshold_normal": 79,
+  "free_shipping_threshold_refrigerated": 150,
+  "free_shipping_threshold_frozen": 150
+}

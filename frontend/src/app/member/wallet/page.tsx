@@ -1,0 +1,153 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Wallet, ArrowUpRight, ArrowDownLeft, Clock, History, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+
+interface Transaction {
+    id: string;
+    type: "earn" | "spend" | "deposit";
+    amount: number;
+    description: string;
+    date: string;
+    status: "completed" | "pending";
+}
+
+export default function MemberWalletPage() {
+    const [mosoCoin, setMosoCoin] = useState(1000);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+    useEffect(() => {
+        // 從 localStorage 讀取最新資料
+        const savedData = localStorage.getItem("memberData");
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            if (parsedData.mosoCoin !== undefined) {
+                setMosoCoin(parsedData.mosoCoin);
+            }
+        }
+
+        // 模擬交易紀錄
+        setTransactions([
+            { id: "TXN001", type: "earn", amount: 1000, description: "VIP 註冊禮", date: "2024-03-22", status: "completed" },
+            { id: "TXN002", type: "earn", amount: 150, description: "訂單 #20240322-01 回饋", date: "2024-03-22", status: "completed" },
+            { id: "TXN003", type: "spend", amount: 50, description: "訂單 #20240325-02 折抵", date: "2024-03-25", status: "completed" },
+        ]);
+    }, []);
+
+    const getTransactionIcon = (type: string) => {
+        switch (type) {
+            case "earn":
+            case "deposit":
+                return <ArrowDownLeft className="text-green-500" size={20} />;
+            case "spend":
+                return <ArrowUpRight className="text-red-500" size={20} />;
+            default:
+                return <Clock className="text-slate-500" size={20} />;
+        }
+    };
+
+    const getTransactionColor = (type: string) => {
+        switch (type) {
+            case "earn":
+            case "deposit":
+                return "text-green-500";
+            case "spend":
+                return "text-red-500";
+            default:
+                return "text-slate-500";
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-10">
+            <div className="container mx-auto px-4 md:px-6">
+                <div className="max-w-4xl mx-auto">
+
+                    <div className="flex items-center justify-between mb-8">
+                        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
+                            <Wallet className="text-moso-pink" size={32} />
+                            Moso 幣錢包
+                        </h1>
+                        <Link href="/member/profile" className="text-slate-500 hover:text-moso-pink transition-colors text-sm font-medium">
+                            返回會員中心
+                        </Link>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8 mb-10">
+                        {/* 錢包餘額卡片 */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="md:col-span-3 bg-gradient-to-br from-moso-pink to-moso-gold rounded-3xl shadow-lg overflow-hidden text-white"
+                        >
+                            <div className="p-8 md:p-10 relative">
+                                <div className="absolute top-0 right-0 p-8 opacity-20">
+                                    <Wallet size={120} />
+                                </div>
+                                <div className="relative z-10">
+                                    <p className="text-white/80 text-lg font-medium mb-2">可用餘額</p>
+                                    <div className="flex items-baseline gap-2 mb-6">
+                                        <span className="text-5xl md:text-6xl font-extrabold">
+                                            {mosoCoin.toLocaleString()}
+                                        </span>
+                                        <span className="text-xl font-medium">Moso 幣</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 bg-white/20 w-fit px-4 py-2 rounded-full backdrop-blur-sm text-sm">
+                                        <AlertCircle size={16} />
+                                        <span>1 Moso 幣 = 1 元新台幣，無使用期限可全額折抵</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+
+                    {/* 交易紀錄區塊 */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden"
+                    >
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                            <History className="text-slate-500 dark:text-slate-400" size={24} />
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white">交易紀錄</h2>
+                        </div>
+
+                        <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                            {transactions.length > 0 ? (
+                                transactions.map((txn) => (
+                                    <div key={txn.id} className="p-6 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                                                {getTransactionIcon(txn.type)}
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-slate-900 dark:text-white mb-1">{txn.description}</p>
+                                                <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                                                    <span>{txn.date}</span>
+                                                    <span className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full">
+                                                        {txn.id}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={`text-xl font-bold ${getTransactionColor(txn.type)}`}>
+                                            {txn.type === "spend" ? "-" : "+"}{txn.amount}
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="p-10 text-center text-slate-500 dark:text-slate-400">
+                                    <p>目前沒有交易紀錄</p>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+
+                </div>
+            </div>
+        </div>
+    );
+}

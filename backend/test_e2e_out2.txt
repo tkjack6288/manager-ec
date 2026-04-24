@@ -1,0 +1,102 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0 -- D:\jay\ai\antigravity\manager-ec\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\jay\ai\antigravity\manager-ec\backend
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+tests/test_e2e.py::test_full_business_workflow ERROR
+
+=================================== ERRORS ====================================
+________________ ERROR at setup of test_full_business_workflow ________________
+
+    @pytest.fixture(autouse=True)
+    def setup_and_teardown_db():
+        # 建立所有表單
+        Base.metadata.create_all(bind=engine)
+    
+        # 寫入測試用商品資料
+        db = TestSessionLocal()
+        if not db.query(Product).filter(Product.sku == "TEST-SKU-001").first():
+>           product = Product(
+                sku="TEST-SKU-001",
+                name="E2E 測試專用商品",
+                description="自動化測試",
+                price=2000,
+                stock=10,
+                category="測試",
+                image_url="",
+                is_active=True
+            )
+
+tests\test_e2e.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<string>:4: in __init__
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state.py:596: in _initialize_instance
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:121: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\orm\state.py:594: in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <models.product.Product object at 0x000001E05F20E000>
+kwargs = {'category': '測試', 'description': '自動化測試', 'image_url': '', 'is_active': True, ...}
+cls_ = <class 'models.product.Product'>, k = 'image_url'
+
+    def _declarative_constructor(self: Any, **kwargs: Any) -> None:
+        """A simple constructor that allows initialization from kwargs.
+    
+        Sets attributes on the constructed instance using the names and
+        values in ``kwargs``.
+    
+        Only keys that are present as
+        attributes of the instance's class are allowed. These could be,
+        for example, any mapped columns or relationships.
+        """
+        cls_ = type(self)
+        for k in kwargs:
+            if not hasattr(cls_, k):
+>               raise TypeError(
+                    "%r is an invalid keyword argument for %s" % (k, cls_.__name__)
+                )
+E               TypeError: 'image_url' is an invalid keyword argument for Product
+
+.venv\Lib\site-packages\sqlalchemy\orm\decl_base.py:2179: TypeError
+============================== warnings summary ===============================
+schemas\user.py:13
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\user.py:13: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(UserBase):
+
+schemas\wallet.py:9
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\wallet.py:9: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class WalletResponse(WalletBase):
+
+schemas\wallet.py:17
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\wallet.py:17: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class WalletTransactionResponse(BaseModel):
+
+schemas\order.py:14
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\order.py:14: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class OrderItemResponse(BaseModel):
+
+schemas\order.py:24
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\order.py:24: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class OrderResponse(BaseModel):
+
+schemas\external_affiliate.py:10
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\external_affiliate.py:10: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ExternalAffiliateResponse(ExternalAffiliateCreate):
+
+schemas\product.py:17
+  D:\jay\ai\antigravity\manager-ec\backend\schemas\product.py:17: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ProductResponse(ProductBase):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR tests/test_e2e.py::test_full_business_workflow - TypeError: 'image_url'...
+======================== 7 warnings, 1 error in 1.61s =========================

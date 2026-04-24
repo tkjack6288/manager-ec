@@ -1,0 +1,9 @@
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+service-account.json
+.env
+.next/
+out.html
+out.txt
