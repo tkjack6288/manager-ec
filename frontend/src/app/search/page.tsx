@@ -27,10 +27,10 @@ function SearchContent() {
     setIsSearching(true);
     let url = `http://localhost:8000/products/?skip=0&limit=50&name=${encodeURIComponent(query)}&sort=${sort}`;
     if (minPrice) {
-      url += `&min_price=${Number(minPrice) / 1.2}`;
+      url += `&min_price=${Number(minPrice)}`;
     }
     if (maxPrice) {
-      url += `&max_price=${Number(maxPrice) / 1.2}`;
+      url += `&max_price=${Number(maxPrice)}`;
     }
     fetch(url)
       .then(res => res.json())
@@ -149,7 +149,7 @@ function SearchContent() {
                 </div>
                 <div className="p-4">
                   <h3 className="font-bold text-slate-800 dark:text-white mb-2 line-clamp-2 mt-2" title={prod.name}>{prod.name}</h3>
-                  <div className="text-lg font-extrabold text-moso-red">NT$ {Math.round(prod.price * 1.2).toLocaleString()}</div>
+                  <div className="text-lg font-extrabold text-moso-red">NT$ {Math.round(prod.selling_price).toLocaleString()}</div>
                 </div>
               </Link>
             </motion.div>

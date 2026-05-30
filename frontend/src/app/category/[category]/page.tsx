@@ -25,10 +25,10 @@ export default function CategoryPage() {
   const fetchData = () => {
     let url = `http://localhost:8000/products/?skip=0&limit=50&category=${encodeURIComponent(categoryName)}&sort=${sort}`;
     if (minPrice) {
-      url += `&min_price=${Number(minPrice) / 1.2}`;
+      url += `&min_price=${Number(minPrice)}`;
     }
     if (maxPrice) {
-      url += `&max_price=${Number(maxPrice) / 1.2}`;
+      url += `&max_price=${Number(maxPrice)}`;
     }
     fetch(url)
       .then(res => res.json())
@@ -161,7 +161,7 @@ export default function CategoryPage() {
                   <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{prod.rating || 5.0}</span>
                 </div>
                 <div className="flex items-end justify-between">
-                  <div className="text-xl font-extrabold text-moso-red">NT$ {Math.round(prod.price * 1.2).toLocaleString()}</div>
+                  <div className="text-xl font-extrabold text-moso-red">NT$ {Math.round(prod.selling_price).toLocaleString()}</div>
                   <button className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-white group-hover:bg-moso-pink group-hover:text-white transition-colors">
                     <ShoppingCart size={20} />
                   </button>

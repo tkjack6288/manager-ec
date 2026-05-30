@@ -23,10 +23,10 @@ export default function Home() {
 
     // 先顯示假資料
     setRecommendations([
-      { id: "1", name: "頂級降噪藍牙耳機 Pro", category: "3C家電", price: 6990, images: "[\"https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&q=80&w=800\"]", rating: 4.8 },
-      { id: "2", name: "微分子保濕精華液 50ml", category: "美妝保養", price: 1280, images: "[\"https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=800\"]", rating: 4.9 },
-      { id: "3", name: "極究人體工學辦公椅", category: "傢俱", price: 4500, images: "[\"https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&q=80&w=800\"]", rating: 4.5 },
-      { id: "4", name: "手沖咖啡器具套裝", category: "日用生活", price: 2980, images: "[\"https://images.unsplash.com/photo-1495474472205-51f753c07f46?auto=format&fit=crop&q=80&w=800\"]", rating: 4.7 }
+      { id: "1", name: "頂級降噪藍牙耳機 Pro", category: "3C家電", selling_price: 8388, price: 6990, images: "[\"https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&q=80&w=800\"]", rating: 4.8 },
+      { id: "2", name: "微分子保濕精華液 50ml", category: "美妝保養", selling_price: 1536, price: 1280, images: "[\"https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=800\"]", rating: 4.9 },
+      { id: "3", name: "極究人體工學辦公椅", category: "傢俱", selling_price: 5400, price: 4500, images: "[\"https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&q=80&w=800\"]", rating: 4.5 },
+      { id: "4", name: "手沖咖啡器具套裝", category: "日用生活", selling_price: 3576, price: 2980, images: "[\"https://images.unsplash.com/photo-1495474472205-51f753c07f46?auto=format&fit=crop&q=80&w=800\"]", rating: 4.7 }
     ]);
 
     // 透過 API 取得 GCP 資料庫內的商品資料
@@ -60,7 +60,7 @@ export default function Home() {
                 subtitle: promos[idx % 3].subtitle,
                 desc: promos[idx % 3].desc,
                 img: imgUrl,
-                reward: Math.round(p.price * 1.2 * 0.1) // 以售價(price * 1.2)的 10% 進行回饋
+                reward: Math.round(p.selling_price * 0.1) // 以售價的 10% 進行回饋
               };
             });
             setBannerItems(newBanners);
@@ -246,8 +246,8 @@ export default function Home() {
                   </div>
                   <div className="flex items-end justify-between">
                     <div>
-                      <span className="text-xs text-slate-500 line-through mr-2">NT$ {Math.round(prod.price * 1.2 * 1.2).toLocaleString()}</span>
-                      <div className="text-xl font-extrabold text-moso-red">NT$ {Math.round(prod.price * 1.2).toLocaleString()}</div>
+                      <span className="text-xs text-slate-500 line-through mr-2">NT$ {Math.round(prod.selling_price * 1.2).toLocaleString()}</span>
+                      <div className="text-xl font-extrabold text-moso-red">NT$ {Math.round(prod.selling_price).toLocaleString()}</div>
                     </div>
                     <button className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-white group-hover:bg-moso-pink group-hover:text-white transition-colors">
                       <ShoppingCart size={20} />

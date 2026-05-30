@@ -48,12 +48,12 @@ export default function CartPage() {
       .then(res => {
         if (res.data) {
           setShippingSettings({
-            threshold_normal: res.data.free_shipping_threshold ?? 1000,
-            threshold_refrigerated: res.data.free_shipping_threshold ?? 1500,
-            threshold_frozen: res.data.free_shipping_threshold ?? 2000,
-            fee_normal: res.data.free_shipping_threshold_normal ?? 100,
-            fee_refrigerated: res.data.free_shipping_threshold_refrigerated ?? 150,
-            fee_frozen: res.data.free_shipping_threshold_frozen ?? 150
+            threshold_normal: res.data.free_shipping_threshold_normal ?? 1000,
+            threshold_refrigerated: res.data.free_shipping_threshold_refrigerated ?? 1500,
+            threshold_frozen: res.data.free_shipping_threshold_frozen ?? 2000,
+            fee_normal: res.data.shipping_fee_normal ?? 100,
+            fee_refrigerated: res.data.shipping_fee_refrigerated ?? 150,
+            fee_frozen: res.data.shipping_fee_frozen ?? 150
           });
         }
       })
@@ -79,6 +79,17 @@ export default function CartPage() {
           }
         });
     }
+
+    // 監聽綠界電子地圖的回傳
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "ECPAY_MAP_RESULT") {
+        setStoreId(event.data.storeId);
+        setStoreName(event.data.storeName);
+        setShippingAddress(event.data.storeAddress);
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, []);
 
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -108,6 +119,18 @@ export default function CartPage() {
 
   const [mosoCoinAmount, setMosoCoinAmount] = useState<number | ''>('');
 
+  const [shippingName, setShippingName] = useState("");
+  const [shippingPhone, setShippingPhone] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingType, setShippingType] = useState("home"); // home, UNIMART, FAMI
+  const [storeId, setStoreId] = useState("");
+  const [storeName, setStoreName] = useState("");
+  const [note, setNote] = useState("");
+
+  const openMap = (subtype: string) => {
+    window.open(`http://localhost:8000/logistics/map/${subtype}`, "map", "width=800,height=600");
+  };
+
   const actualMosoToUse = useMosoCoin ? (mosoCoinAmount === '' ? Math.min(subtotalWithShipping, userMosoCoin) : Math.min(subtotalWithShipping, userMosoCoin, Number(mosoCoinAmount))) : 0;
   const mosoDeduction = actualMosoToUse;
   const finalPaid = subtotalWithShipping - mosoDeduction;
@@ -133,15 +156,34 @@ export default function CartPage() {
       return;
     }
 
+    if (!shippingName || !shippingPhone || (!shippingAddress && shippingType === "home")) {
+      alert("請填寫完整的配送資訊（姓名、電話、地址）！");
+      return;
+    }
+
+    if (shippingType !== "home" && (!storeId || !storeName)) {
+      alert("請選擇超商門市！");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const orderPayload = {
         items: cartItems.map(item => ({
           product_id: item.id,
-          quantity: item.quantity
+          quantity: item.quantity,
+          variant: item.variant || null
         })),
         use_moso_coin: useMosoCoin ? actualMosoToUse : false,
-        payment_method: finalPaid === 0 ? "wallet" : "ecpay"
+        shipping_fee: actualShippingFee,
+        payment_method: finalPaid === 0 ? "wallet" : "ecpay",
+        shipping_name: shippingName,
+        shipping_phone: shippingPhone,
+        shipping_address: shippingAddress,
+        note: note,
+        shipping_type: shippingType,
+        store_id: storeId,
+        store_name: storeName
       };
 
       const res = await axios.post("http://localhost:8000/orders/", orderPayload, {
@@ -159,7 +201,7 @@ export default function CartPage() {
         } else {
           // 全額折抵，直接成功
           alert("結帳成功！已使用 Moso 幣全額折抵。");
-          router.push("/admin/orders");
+          router.push("/member/orders");
         }
       }
     } catch (error: any) {
@@ -242,6 +284,66 @@ export default function CartPage() {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 p-6 sticky top-24">
               <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">訂單摘要</h2>
 
+              {/* 配送資訊 */}
+              <div className="mb-6 space-y-4">
+                <h3 className="font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">配送資訊</h3>
+                <div className="hidden"> {/* 暫時隱藏運送方式，預設使用宅配 */}
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">運送方式</label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" name="shippingType" value="home" checked={shippingType === 'home'} onChange={() => { setShippingType('home'); setStoreId(""); setStoreName(""); setShippingAddress(""); }} />
+                      <span className="text-sm">宅配</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" name="shippingType" value="UNIMART" checked={shippingType === 'UNIMART'} onChange={() => { setShippingType('UNIMART'); setStoreId(""); setStoreName(""); setShippingAddress(""); }} />
+                      <span className="text-sm">7-11 店到店</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" name="shippingType" value="FAMI" checked={shippingType === 'FAMI'} onChange={() => { setShippingType('FAMI'); setStoreId(""); setStoreName(""); setShippingAddress(""); }} />
+                      <span className="text-sm">全家 店到店</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">收件人姓名 <span className="text-red-500">*</span></label>
+                  <input type="text" value={shippingName} onChange={e => setShippingName(e.target.value)} placeholder="請輸入姓名" className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-moso-pink/50" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">聯絡電話 <span className="text-red-500">*</span></label>
+                  <input type="tel" value={shippingPhone} onChange={e => setShippingPhone(e.target.value)} placeholder="請輸入電話" className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-moso-pink/50" />
+                </div>
+                
+                {shippingType === "home" ? (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">配送地址 <span className="text-red-500">*</span></label>
+                    <input type="text" value={shippingAddress} onChange={e => setShippingAddress(e.target.value)} placeholder="請輸入地址" className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-moso-pink/50" />
+                  </div>
+                ) : (
+                  <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">選擇門市 <span className="text-red-500">*</span></label>
+                      <button onClick={() => openMap(shippingType)} type="button" className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 rounded text-sm transition-colors">
+                        開啟地圖選擇
+                      </button>
+                    </div>
+                    {storeName ? (
+                      <div className="text-sm">
+                        <p className="font-bold text-slate-800 dark:text-white">{storeName} ({storeId})</p>
+                        <p className="text-slate-500">{shippingAddress}</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-400">尚未選擇門市</p>
+                    )}
+                  </div>
+                )}
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">訂單備註</label>
+                  <textarea rows={2} value={note} onChange={e => setNote(e.target.value)} placeholder="有什麼想告訴賣家的嗎？" className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-moso-pink/50" />
+                </div>
+              </div>
+
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-slate-600 dark:text-slate-300">
                   <span>商品總計</span>
@@ -283,7 +385,13 @@ export default function CartPage() {
                   </div>
                   {isLoggedIn && userMosoCoin > 0 && (
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={useMosoCoin} onChange={() => setUseMosoCoin(!useMosoCoin)} />
+                      <input type="checkbox" className="sr-only peer" checked={useMosoCoin} onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        setUseMosoCoin(isChecked);
+                        if (isChecked) {
+                          setMosoCoinAmount(Math.min(subtotalWithShipping, userMosoCoin));
+                        }
+                      }} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-moso-pink"></div>
                     </label>
                   )}

@@ -3,7 +3,9 @@
   "maintenance_mode": true,
   "reward_percentage": 10,
   "free_shipping_threshold": 999,
-  "free_shipping_threshold_normal": 79,
-  "free_shipping_threshold_refrigerated": 150,
-  "free_shipping_threshold_frozen": 150
+  "free_shipping_threshold_normal": 999,
+  "free_shipping_threshold_refrigerated": 1999,
+  "free_shipping_threshold_frozen": 1999,
+  "shipping_fee_normal": 79,
+  "review_reward_coin": 5
 }

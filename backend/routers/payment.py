@@ -29,6 +29,10 @@ def ecpay_checkout(order_id: str, db: Session = Depends(get_db)):
     unique_suffix = str(int(now.timestamp()))[-6:]
     merchant_trade_no = f"MOSO{order.id.replace('-', '')[:10]}{unique_suffix}"
 
+    order.merchant_trade_no = merchant_trade_no
+    db.add(order)
+    db.commit()
+
     params = {
         "MerchantID": MERCHANT_ID,
         "MerchantTradeNo": merchant_trade_no, 
@@ -39,7 +43,7 @@ def ecpay_checkout(order_id: str, db: Session = Depends(get_db)):
         "ItemName": "Mososhop_Products",
         "ReturnURL": "http://localhost:8000/payments/ecpay/webhook",
         # 結帳成功後跳轉回訂單頁面
-        "ClientBackURL": "http://localhost:8080/admin/orders",
+        "ClientBackURL": "http://localhost:8080/member/orders",
         "ChoosePayment": "ALL",
         "EncryptType": 1,
         # 將真實的 UUID 藏在 CustomField1 內傳遞
@@ -90,6 +94,44 @@ def ecpay_checkout(order_id: str, db: Session = Depends(get_db)):
     response.headers["Expires"] = "0"
     return response
 
+import requests
+
+def cancel_ecpay_authorization(merchant_trade_no: str, trade_no: str, total_amount: int) -> bool:
+    """呼叫綠界 API 執行信用卡取消授權"""
+    if not merchant_trade_no and not trade_no:
+        print("ECPay Cancel skipped: missing merchant_trade_no and trade_no")
+        return False
+        
+    params = {
+        "MerchantID": MERCHANT_ID,
+        "Action": "N", # N: 放棄授權
+        "TotalAmount": int(total_amount)
+    }
+    if merchant_trade_no:
+        params["MerchantTradeNo"] = merchant_trade_no
+    if trade_no:
+        params["TradeNo"] = trade_no
+    
+    sorted_params = sorted(params.items())
+    raw_str = f"HashKey={HASH_KEY}&" + "&".join([f"{k}={v}" for k, v in sorted_params]) + f"&HashIV={HASH_IV}"
+    
+    url_encoded_str = urllib.parse.quote_plus(raw_str).lower()
+    url_encoded_str = url_encoded_str.replace('%2d', '-').replace('%5f', '_').replace('%2e', '.').replace('%21', '!').replace('%2a', '*').replace('%28', '(').replace('%29', ')')
+
+    check_mac_value = hashlib.sha256(url_encoded_str.encode('utf-8')).hexdigest().upper()
+    params["CheckMacValue"] = check_mac_value
+    
+    api_url = "https://payment.ecpay.com.tw/CreditDetail/DoAction"
+    try:
+        res = requests.post(api_url, data=params, timeout=10)
+        if "RtnCode=1" in res.text:
+            return True
+        print(f"ECPay Cancel Failed: {res.text}")
+        return False
+    except Exception as e:
+        print(f"ECPay Cancel Exception: {e}")
+        return False
+
 @router.post("/ecpay/webhook")
 async def ecpay_webhook(request: Request, db: Session = Depends(get_db)):
     """接收從綠界金流發送過來的付款結果 Webhook"""
@@ -104,6 +146,7 @@ async def ecpay_webhook(request: Request, db: Session = Depends(get_db)):
         
     merchant_trade_no = data["MerchantTradeNo"]
     rtn_code = data["RtnCode"]
+    trade_no = data.get("TradeNo")
     
     # 解析訂單 ID (使用 CustomField1)
     order_id = data.get("CustomField1", "")
@@ -115,6 +158,7 @@ async def ecpay_webhook(request: Request, db: Session = Depends(get_db)):
     # RtnCode == 1 代表付款成功
     if rtn_code == "1":
         order.status = "paid"
+        order.trade_no = trade_no
         db.add(order)
         db.commit()
         return "1|OK"

@@ -34,20 +34,20 @@ export default function Footer() {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-white">會員專區</h4>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li><Link href="#" className="hover:text-moso-pink transition-colors">會員中心</Link></li>
-              <li><Link href="#" className="hover:text-moso-pink transition-colors">訂單查詢</Link></li>
-              <li><Link href="#" className="hover:text-moso-pink transition-colors">Moso 幣明細</Link></li>
-              <li><Link href="#" className="hover:text-moso-pink transition-colors">升級 VIP 說明</Link></li>
+              <li><Link href="/member/profile" className="hover:text-moso-pink transition-colors">會員中心</Link></li>
+              <li><Link href="/member/orders" className="hover:text-moso-pink transition-colors">訂單查詢</Link></li>
+              <li><Link href="/member/wallet" className="hover:text-moso-pink transition-colors">Moso 幣明細</Link></li>
+              <li><Link href="/vip-info" className="hover:text-moso-pink transition-colors">升級 VIP 說明</Link></li>
             </ul>
           </div>
 
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-white">購物說明</h4>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li><Link href="#" className="hover:text-moso-pink transition-colors">付款方式</Link></li>
-              <li><Link href="#" className="hover:text-moso-pink transition-colors">運費與配送</Link></li>
-              <li><Link href="#" className="hover:text-moso-pink transition-colors">退換貨政策</Link></li>
-              <li><Link href="#" className="hover:text-moso-pink transition-colors">外部導購回饋</Link></li>
+              <li><Link href="/payment-info" className="hover:text-moso-pink transition-colors">付款方式</Link></li>
+              <li><Link href="/shipping-info" className="hover:text-moso-pink transition-colors">運費與配送</Link></li>
+              <li><Link href="/return-policy" className="hover:text-moso-pink transition-colors">退換貨政策</Link></li>
+              <li><Link href="/affiliate-info" className="hover:text-moso-pink transition-colors">外部導購回饋</Link></li>
             </ul>
           </div>
 

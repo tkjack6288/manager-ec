@@ -12,7 +12,9 @@ export default function AdminOrders() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/admin/orders`);
+      const res = await fetch(`${API_BASE}/admin/orders?t=${Date.now()}`, {
+        cache: "no-store"
+      });
       const data = await res.json();
       setOrders(data);
     } catch (err) {
@@ -26,8 +28,22 @@ export default function AdminOrders() {
     fetchOrders();
   }, []);
 
+  const getStatusText = (s: string) => {
+    switch (s) {
+      case "pending": return "待處理";
+      case "paid": return "已付款";
+      case "shipping": return "出貨中";
+      case "completed": return "已完成";
+      case "cancelled": return "已取消";
+      case "returning": return "申請退貨中";
+      case "returned": return "已退貨";
+      case "return_cancelled": return "客戶取消退貨";
+      default: return s;
+    }
+  };
+
   const handleStatusChange = async (orderId: string, newStatus: string) => {
-    if (!confirm(`確定要將狀態改為 ${newStatus} 嗎？`)) return;
+    if (!confirm(`確定要將狀態改為「${getStatusText(newStatus)}」嗎？`)) return;
     try {
       const res = await fetch(`${API_BASE}/admin/orders/${orderId}/status?status=${newStatus}`, {
         method: "PUT"
@@ -43,11 +59,33 @@ export default function AdminOrders() {
 
   const StatusBadge = ({ status }: { status: string }) => {
     switch (status) {
-      case "pending": return <span className="flex items-center gap-1 text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md text-xs font-bold"><Clock size={14} /> 待處理</span>;
+      case "pending":
+      case "paid": return <span className="flex items-center gap-1 text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md text-xs font-bold"><Clock size={14} /> 待處理</span>;
       case "shipping": return <span className="flex items-center gap-1 text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md text-xs font-bold"><Truck size={14} /> 出貨中</span>;
       case "completed": return <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2.5 py-1 rounded-md text-xs font-bold"><CheckCircle size={14} /> 已完成</span>;
       case "cancelled": return <span className="flex items-center gap-1 text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md text-xs font-bold">已取消</span>;
+      case "returning": return <span className="flex items-center gap-1 text-purple-600 bg-purple-50 px-2.5 py-1 rounded-md text-xs font-bold"><Clock size={14} /> 申請退貨中</span>;
+      case "returned": return <span className="flex items-center gap-1 text-red-600 bg-red-50 px-2.5 py-1 rounded-md text-xs font-bold">已退貨</span>;
+      case "return_cancelled": return <span className="flex items-center gap-1 text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md text-xs font-bold">客戶取消退貨</span>;
       default: return <span className="flex items-center gap-1 text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md text-xs font-bold">{status}</span>;
+    }
+  };
+
+  const handleConfirmReturn = async (orderId: string) => {
+    if (!confirm("確定確認收貨無誤，並執行退款作業嗎？")) return;
+    try {
+      const res = await fetch(`${API_BASE}/admin/orders/${orderId}/return_confirm`, {
+        method: "PUT"
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || "操作失敗");
+      }
+      alert("退貨與退款作業已完成");
+      fetchOrders();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "確認退貨失敗");
     }
   };
 
@@ -93,7 +131,8 @@ export default function AdminOrders() {
             <thead className="bg-white text-slate-400 font-bold border-b border-slate-100 uppercase text-xs tracking-wider">
               <tr>
                 <th className="px-6 py-4">訂單編號 & 時間</th>
-                <th className="px-6 py-4">顧客 ID</th>
+                <th className="px-6 py-4">顧客</th>
+                <th className="px-6 py-4">商品內容</th>
                 <th className="px-6 py-4 text-right">訂單總額</th>
                 <th className="px-6 py-4 text-right">Moso 幣折抵</th>
                 <th className="px-6 py-4 text-right">實付金額</th>
@@ -105,11 +144,11 @@ export default function AdminOrders() {
             <tbody className="divide-y divide-slate-50">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-8">載入中...</td>
+                  <td colSpan={9} className="text-center py-8">載入中...</td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-8">目前無訂單</td>
+                  <td colSpan={9} className="text-center py-8">目前無訂單</td>
                 </tr>
               ) : (
                 orders.map((order) => (
@@ -118,8 +157,21 @@ export default function AdminOrders() {
                       <div className="font-bold text-slate-800" title={order.id}>{order.id.slice(0, 18)}...</div>
                       <div className="text-xs text-slate-400 mt-1">{new Date(order.created_at).toLocaleString()}</div>
                     </td>
-                    <td className="px-6 py-4 font-medium text-slate-700 text-xs" title={order.user_id}>
-                      {order.user_id.slice(0, 8)}...
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-slate-700">{order.user_name || "未知顧客"}</div>
+                      <div className="text-xs text-slate-400 mt-1" title={order.user_id}>{order.user_id.slice(0, 8)}...</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        {order.items && order.items.map((item: any) => (
+                          <div key={item.id} className="text-xs">
+                            <span className="text-slate-500 mr-2">{item.quantity}x</span>
+                            <a href={`/product/${item.product_id}`} target="_blank" rel="noopener noreferrer" className="text-moso-pink hover:underline font-medium">
+                              {item.product_name || "未知商品"}
+                            </a>
+                          </div>
+                        ))}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right font-medium">NT$ {order.total_amount.toLocaleString()}</td>
                     <td className="px-6 py-4 text-right text-moso-pink font-bold">- {order.moso_coin_used}</td>
@@ -134,7 +186,17 @@ export default function AdminOrders() {
                       )}
                     </td>
                     <td className="px-6 py-4 flex justify-center mt-2.5">
-                      <StatusBadge status={order.status} />
+                      <div className="flex flex-col items-center gap-2">
+                        <StatusBadge status={order.status} />
+                        {order.status === "returning" && (
+                          <button
+                            onClick={() => handleConfirmReturn(order.id)}
+                            className="px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors"
+                          >
+                            確認收貨無誤
+                          </button>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <select
@@ -143,9 +205,13 @@ export default function AdminOrders() {
                         onChange={(e) => handleStatusChange(order.id, e.target.value)}
                       >
                         <option value="pending">待處理</option>
+                        <option value="paid">已付款</option>
                         <option value="shipping">出貨中</option>
                         <option value="completed">已完成</option>
                         <option value="cancelled">已取消</option>
+                        <option value="returning">申請退貨中</option>
+                        <option value="returned">已退貨</option>
+                        <option value="return_cancelled">取消退貨</option>
                       </select>
                     </td>
                   </tr>

@@ -6,7 +6,8 @@ import {
     ShoppingCart,
     Users,
     Settings,
-    LogOut
+    LogOut,
+    Star
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,6 +20,7 @@ export default function AdminSidebar() {
         { href: "/admin/products", icon: Package, label: "商品管理" },
         { href: "/admin/orders", icon: ShoppingCart, label: "訂單管理" },
         { href: "/admin/users", icon: Users, label: "會員管理" },
+        { href: "/admin/reviews", icon: Star, label: "評價管理" },
         { href: "/admin/settings", icon: Settings, label: "系統設定" },
     ];
 

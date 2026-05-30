@@ -5,6 +5,7 @@ import { User, Package, Wallet, Settings, LogOut, ChevronRight, Star } from "luc
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function MemberProfilePage() {
     const router = useRouter();
@@ -27,6 +28,23 @@ export default function MemberProfilePage() {
                 name: parsedData.name,
                 email: parsedData.email,
             }));
+        }
+
+        // 呼叫 API 取得真實的 Moso 幣餘額
+        const token = localStorage.getItem("token");
+        if (token) {
+            axios.get(`http://localhost:8000/wallets/me?t=${Date.now()}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => {
+                setMemberData(prev => ({
+                    ...prev,
+                    mosoCoin: Math.ceil(res.data.moso_coin || 0)
+                }));
+            })
+            .catch(err => {
+                console.error("無法取得錢包資料：", err);
+            });
         }
     }, []);
 

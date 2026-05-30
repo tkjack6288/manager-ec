@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Wallet, ArrowUpRight, ArrowDownLeft, Clock, History, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 interface Transaction {
     id: string;
@@ -19,21 +20,59 @@ export default function MemberWalletPage() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
 
     useEffect(() => {
-        // 從 localStorage 讀取最新資料
+        // 從 localStorage 讀取最新資料（僅為輔助顯示）
         const savedData = localStorage.getItem("memberData");
         if (savedData) {
             const parsedData = JSON.parse(savedData);
             if (parsedData.mosoCoin !== undefined) {
-                setMosoCoin(parsedData.mosoCoin);
+                // 先不依賴 localStorage 的舊資料，以防覆蓋
             }
         }
 
-        // 模擬交易紀錄
-        setTransactions([
-            { id: "TXN001", type: "earn", amount: 1000, description: "VIP 註冊禮", date: "2024-03-22", status: "completed" },
-            { id: "TXN002", type: "earn", amount: 150, description: "訂單 #20240322-01 回饋", date: "2024-03-22", status: "completed" },
-            { id: "TXN003", type: "spend", amount: 50, description: "訂單 #20240325-02 折抵", date: "2024-03-25", status: "completed" },
-        ]);
+        // 呼叫真實 API 取得錢包資料
+        const token = localStorage.getItem("token");
+        if (token) {
+            axios.get(`http://localhost:8000/wallets/me?t=${Date.now()}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+                .then(res => {
+                    // 設定 Moso 幣餘額，無條件進位成整數
+                    setMosoCoin(Math.ceil(res.data.moso_coin || 0));
+
+                    // 處理並排序交易紀錄
+                    const apiTxns = res.data.transactions || [];
+
+                    // 排序：最新的排前面
+                    apiTxns.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+                    const mappedTxns = apiTxns.map((txn: any) => {
+                        // 對應 transaction_type 到描述
+                        let desc = "系統調整";
+                        if (txn.transaction_type === "spend") desc = "消費折抵";
+                        if (txn.transaction_type === "reward") desc = "消費回饋";
+                        if (txn.transaction_type === "refund") desc = "退款轉入";
+                        if (txn.transaction_type === "reward_revert") desc = "回饋扣回";
+                        if (txn.transaction_type === "deposit") desc = "現金儲值";
+
+                        // 判斷類型（收入或支出）
+                        const tType = txn.amount >= 0 ? "earn" : "spend";
+
+                        return {
+                            id: txn.id.substring(0, 8).toUpperCase(), // 顯示部分 ID 作為參考
+                            type: tType,
+                            amount: Math.abs(txn.amount), // 取絕對值，前端會依 type 補上正負號
+                            description: desc, // 根據需求，只顯示中文狀態，不顯示 reference_id
+                            date: new Date(txn.created_at).toLocaleDateString("zh-TW", { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                            status: "completed"
+                        };
+                    });
+
+                    setTransactions(mappedTxns);
+                })
+                .catch(err => {
+                    console.error("無法取得錢包資料：", err);
+                });
+        }
     }, []);
 
     const getTransactionIcon = (type: string) => {

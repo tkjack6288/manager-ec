@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, RefreshCw, Settings, Store, CreditCard, ShieldAlert } from "lucide-react";
+import { Save, RefreshCw, Settings, Store, CreditCard, ShieldAlert, Truck } from "lucide-react";
 
 const API_BASE = "http://localhost:8000";
 
@@ -13,7 +13,11 @@ export default function AdminSettings() {
         free_shipping_threshold: 1000,
         free_shipping_threshold_normal: 79,
         free_shipping_threshold_refrigerated: 150,
-        free_shipping_threshold_frozen: 150
+        free_shipping_threshold_frozen: 150,
+        shipping_fee_normal: 100,
+        shipping_fee_refrigerated: 150,
+        shipping_fee_frozen: 150,
+        review_reward_coin: 50
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -126,92 +130,129 @@ export default function AdminSettings() {
                             </div>
                             <p className="text-xs text-slate-500 mt-1">全站購買商品的基礎點數回饋比例。</p>
                         </div>
-
-                        <div className="space-y-4">
-                            <label className="block text-sm font-medium text-slate-700">免運費門檻 (NT$)</label>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">評價回饋MOSO幣金額</label>
                             <div className="relative max-w-xs">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">NT$</span>
                                 <input
                                     type="number"
                                     min="0"
-                                    value={settings.free_shipping_threshold}
-                                    onChange={(e) => setSettings({ ...settings, free_shipping_threshold: Number(e.target.value) })}
-                                    className="w-full pl-10 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
+                                    value={settings.review_reward_coin ?? 50}
+                                    onChange={(e) => setSettings({ ...settings, review_reward_coin: Number(e.target.value) })}
+                                    className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
                                 />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">點</span>
                             </div>
-
-                            <label className="block text-sm font-medium text-slate-700 mt-4">各溫層運費 (NT$)</label>
-
-                            <div>
-                                <label className="block text-xs font-medium text-slate-600 mb-1">常溫運費</label>
-                                <div className="relative max-w-xs">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">NT$</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={settings.free_shipping_threshold_normal}
-                                        onChange={(e) => setSettings({ ...settings, free_shipping_threshold_normal: Number(e.target.value) })}
-                                        className="w-full pl-10 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-medium text-slate-600 mb-1">冷藏運費</label>
-                                <div className="relative max-w-xs">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">NT$</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={settings.free_shipping_threshold_refrigerated}
-                                        onChange={(e) => setSettings({ ...settings, free_shipping_threshold_refrigerated: Number(e.target.value) })}
-                                        className="w-full pl-10 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-medium text-slate-600 mb-1">冷凍運費</label>
-                                <div className="relative max-w-xs">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">NT$</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={settings.free_shipping_threshold_frozen}
-                                        onChange={(e) => setSettings({ ...settings, free_shipping_threshold_frozen: Number(e.target.value) })}
-                                        className="w-full pl-10 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
-                                    />
-                                </div>
-                            </div>
-
-                            <p className="text-xs text-slate-500 mt-2">購物車將依據商品溫層分別計算運費，若無標示溫層預設以冷凍計費。滿免運門檻即自動免收運費。</p>
+                            <p className="text-xs text-slate-500 mt-1">會員完成訂單並給予商品評價後所獲得的 Moso 幣獎勵。</p>
                         </div>
                     </div>
                 </div>
 
-                {/* 系統維護 */}
+                {/* 免運費門檻設定 */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="p-6 border-b border-slate-100 flex items-center gap-3">
-                        <ShieldAlert className="text-red-500" size={24} />
-                        <h2 className="text-xl font-bold text-slate-800">系統與安全</h2>
+                        <Truck className="text-blue-500" size={24} />
+                        <h2 className="text-xl font-bold text-slate-800">免運費門檻 (NT$)</h2>
                     </div>
-                    <div className="p-6">
-                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                    <div className="p-6 grid sm:grid-cols-3 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">常溫 免運門檻</label>
                             <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">NT$</span>
                                 <input
-                                    type="checkbox"
-                                    className="sr-only"
-                                    checked={settings.maintenance_mode}
-                                    onChange={(e) => setSettings({ ...settings, maintenance_mode: e.target.checked })}
+                                    type="number"
+                                    min="0"
+                                    value={settings.free_shipping_threshold_normal}
+                                    onChange={(e) => setSettings({ ...settings, free_shipping_threshold_normal: Number(e.target.value) })}
+                                    className="w-full pl-10 border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
                                 />
-                                <div className={`block w-14 h-8 rounded-full transition-colors ${settings.maintenance_mode ? 'bg-red-500' : 'bg-slate-300'}`}></div>
-                                <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${settings.maintenance_mode ? 'translate-x-6' : ''}`}></div>
                             </div>
-                            <div>
-                                <div className="font-bold text-slate-800">開啟網站維護模式</div>
-                                <div className="text-sm text-slate-500">開啟後，一般會員將無法進入前台購物，僅允許管理員存取。</div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">冷藏 免運門檻</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">NT$</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={settings.free_shipping_threshold_refrigerated}
+                                    onChange={(e) => setSettings({ ...settings, free_shipping_threshold_refrigerated: Number(e.target.value) })}
+                                    className="w-full pl-10 border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
+                                />
                             </div>
-                        </label>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">冷凍 免運門檻</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">NT$</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={settings.free_shipping_threshold_frozen}
+                                    onChange={(e) => setSettings({ ...settings, free_shipping_threshold_frozen: Number(e.target.value) })}
+                                    className="w-full pl-10 border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="px-6 pb-6 text-sm text-slate-500">
+                        購物車將依據商品溫層分別計算運費。單一溫層的商品總額滿該溫層之免運門檻，即自動免收該溫層運費。
+                    </div>
+                </div>
+
+                {/* 運費設定 */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="p-6 border-b border-slate-100 flex items-center gap-3">
+                        <Truck className="text-blue-500" size={24} />
+                        <h2 className="text-xl font-bold text-slate-800">運費 (NT$)</h2>
+                    </div>
+                    <div className="p-6 grid sm:grid-cols-3 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">常溫 運費</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">NT$</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={settings.shipping_fee_normal ?? 100}
+                                    onChange={(e) => setSettings({ ...settings, shipping_fee_normal: Number(e.target.value) })}
+                                    className="w-full pl-10 border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">冷藏 運費</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">NT$</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={settings.shipping_fee_refrigerated ?? 150}
+                                    onChange={(e) => setSettings({ ...settings, shipping_fee_refrigerated: Number(e.target.value) })}
+                                    className="w-full pl-10 border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">冷凍 運費</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">NT$</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={settings.shipping_fee_frozen ?? 150}
+                                    onChange={(e) => setSettings({ ...settings, shipping_fee_frozen: Number(e.target.value) })}
+                                    className="w-full pl-10 border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-moso-pink focus:ring-1 focus:ring-moso-pink"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="px-6 pb-6 text-sm text-slate-500">
+                        設定各溫層的基本運費金額。當購物車內該溫層商品未達免運門檻時，將會收取此運費金額。
                     </div>
                 </div>
 

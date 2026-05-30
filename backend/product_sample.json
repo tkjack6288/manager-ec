@@ -1,0 +1,13 @@
+{
+  "id": "c092d3a6-e8f1-469b-a720-67960975fc1e",
+  "sku": "TEST-SKU-001",
+  "name": "E2E 測試專用商品",
+  "description": "自動化測試",
+  "price": 2000,
+  "stock": 99997,
+  "category": "測試",
+  "is_active": 1,
+  "created_at": "2026-03-14 14:42:04.949810",
+  "updated_at": "2026-03-14 15:05:30.999788",
+  "temperature": "normal"
+}
