@@ -4,7 +4,7 @@
 
 PROJECT_ID="antigravity-ecommerce"
 REGION="asia-east1"
-DATABASE_URL="postgresql://postgres:adminpassword@34.80.36.202:5432/mosodb-ec"
+# DATABASE_URL="postgresql://user:password@host:5432/dbname"
 
 echo "=== 準備部署 Mososhop 後端 API 至 Cloud Run ==="
 gcloud config set project $PROJECT_ID

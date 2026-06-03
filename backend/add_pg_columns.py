@@ -1,7 +1,7 @@
 import sqlalchemy
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:adminpassword@34.80.36.202:5432/mosodb-ec")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 engine = sqlalchemy.create_engine(DATABASE_URL)
 
 with engine.connect() as conn:

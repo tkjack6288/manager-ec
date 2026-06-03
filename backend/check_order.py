@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 sys.path.insert(0, os.path.abspath('backend'))
 from models.order import Order
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:adminpassword@34.80.36.202:5432/mosodb-ec")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 db = SessionLocal()

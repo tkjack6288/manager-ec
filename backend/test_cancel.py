@@ -33,7 +33,7 @@ order = order_res.json()
 print("Order created:", order["id"])
 
 # 4. Simulate ECPay webhook to set trade_no and merchant_trade_no
-engine = create_engine(os.getenv("DATABASE_URL", "postgresql://postgres:adminpassword@34.80.36.202:5432/mosodb-ec"))
+engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./test.db"))
 SessionLocal = sessionmaker(bind=engine)
 db = SessionLocal()
 

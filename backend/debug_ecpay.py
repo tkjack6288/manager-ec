@@ -4,9 +4,10 @@ import hashlib
 import urllib.parse
 import requests
 
-MERCHANT_ID = "3209113"
-HASH_KEY = "sOlG7lIXmMQIwizh"
-HASH_IV = "WN4Aov7OVQCSSCTx"
+# 若未提供正式金流金鑰，預設使用綠界測試用金鑰
+MERCHANT_ID = os.getenv("ECPAY_MERCHANT_ID", "2000132")
+HASH_KEY = os.getenv("ECPAY_HASH_KEY", "5294y06JbISpM5x9")
+HASH_IV = os.getenv("ECPAY_HASH_IV", "v77hoKGq4kWxNNIS")
 
 def test_ecpay(merchant_trade_no, trade_no, total_amount, action):
     params = {

@@ -37,7 +37,7 @@ import sys
 sys.path.insert(0, os.path.abspath('backend'))
 from backend.models.order import Order
 
-engine = create_engine(os.getenv("DATABASE_URL", "postgresql://postgres:adminpassword@34.80.36.202:5432/mosodb-ec"))
+engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///./test.db"))
 SessionLocal = sessionmaker(bind=engine)
 db = SessionLocal()
 
