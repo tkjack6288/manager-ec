@@ -1,12 +1,17 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect */
 
 "use client";
 
 import { motion } from "framer-motion";
 import { useParams } from "next/navigation";
-import { ShoppingCart, Heart, Star, CheckCircle, Shield, Truck, Crown, Gem, Sparkles, Key } from "lucide-react";
+import { ShoppingCart, Heart, Star, CheckCircle, Sparkles, Key } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
+import DOMPurify from "dompurify";
 
 export default function ProductDetailPage() {
     const params = useParams();
@@ -33,7 +38,7 @@ export default function ProductDetailPage() {
         }
 
         // 透過 API 取得 GCP 資料庫內的單一商品資料
-        axios.get(`http://localhost:8000/products/${productId}`)
+        axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/products/${productId}`)
             .then(res => {
                 const data = res.data;
                 // Parse variants
@@ -65,7 +70,7 @@ export default function ProductDetailPage() {
             });
 
         // 取得商品評價
-        axios.get(`http://localhost:8000/products/${productId}/reviews`)
+        axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/products/${productId}/reviews`)
             .then(res => {
                 if (res.data && Array.isArray(res.data.reviews)) {
                     setReviews(res.data.reviews);
@@ -358,7 +363,7 @@ export default function ProductDetailPage() {
                         </h2>
                         <div 
                             className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed"
-                            dangerouslySetInnerHTML={{ __html: product.description || "暫無詳細商品描述。" }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description || "暫無詳細商品描述。") }}
                         />
                     </div>
 

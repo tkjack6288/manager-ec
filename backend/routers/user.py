@@ -23,7 +23,7 @@ class ForgotPasswordRequest(BaseModel):
     email: str
 
 def send_reset_password_email(recipient_email: str):
-    sender_email = "tkjack6288@gmail.com.tw"
+    sender_email = "mososhop2020@gmail.com"
     # 從環境變數讀取應用程式密碼，若未設定則先預設為空字串（需設定環境變數 GMAIL_APP_PASSWORD）
     app_password = os.environ.get("GMAIL_APP_PASSWORD", "")
     

@@ -1,9 +1,11 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
 import { Plus, Search, Edit, Trash2, Tag, CheckCircle2, XCircle, ExternalLink, Settings } from "lucide-react";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = `https://manager-ec-backend-164815154526.asia-east1.run.app`;
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<any[]>([]);
@@ -20,7 +22,7 @@ export default function AdminProducts() {
     try {
       setLoading(true);
       const url = query ? `${API_BASE}/admin/products?search=${encodeURIComponent(query)}` : `${API_BASE}/admin/products`;
-      const res = await fetch(url);
+      const res = await fetch(url, { headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` } });
       const data = await res.json();
       setProducts(data);
     } catch (err) {
@@ -32,7 +34,7 @@ export default function AdminProducts() {
 
   const fetchChannels = async () => {
     try {
-      const res = await fetch(`${API_BASE}/admin/channels`);
+      const res = await fetch(`${API_BASE}/admin/channels`, { headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` } });
       const data = await res.json();
       setChannels(data);
     } catch (err) {
@@ -47,7 +49,7 @@ export default function AdminProducts() {
   const handleDelete = async (id: string) => {
     if (!confirm("確定要刪除此商品嗎？")) return;
     try {
-      const res = await fetch(`${API_BASE}/admin/products/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE}/admin/products/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` } });
       if (!res.ok) throw new Error("刪除失敗");
       alert("商品已刪除");
       fetchProducts();
@@ -64,7 +66,7 @@ export default function AdminProducts() {
     try {
       const res = await fetch(`${API_BASE}/admin/channels`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}`, "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim(), channel_type: type })
       });
       if (!res.ok) throw new Error("新增失敗");

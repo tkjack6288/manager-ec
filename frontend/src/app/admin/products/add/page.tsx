@@ -1,3 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,7 +9,7 @@ import { XCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import RichTextEditor from "@/components/RichTextEditor";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = `https://manager-ec-backend-164815154526.asia-east1.run.app`;
 
 export default function AddProductPage() {
     const router = useRouter();
@@ -15,7 +18,7 @@ export default function AddProductPage() {
     useEffect(() => {
         const fetchChannels = async () => {
             try {
-                const res = await fetch(`${API_BASE}/admin/channels`);
+                const res = await fetch(`${API_BASE}/admin/channels`, { headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` } });
                 const data = await res.json();
                 setChannels(data);
             } catch (err) {
@@ -63,6 +66,7 @@ export default function AddProductPage() {
                 uploadData.append("file", file);
                 const res = await fetch(`${API_BASE}/admin/upload`, {
                     method: "POST",
+                    headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` },
                     body: uploadData,
                 });
                 if (!res.ok) throw new Error("Upload failed");
@@ -123,7 +127,7 @@ export default function AddProductPage() {
 
             const res = await fetch(`${API_BASE}/admin/products`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}`, "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 

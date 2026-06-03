@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
 import { Search, Shield, CheckCircle2, XCircle } from "lucide-react";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = `https://manager-ec-backend-164815154526.asia-east1.run.app`;
 
 export default function AdminUsers() {
     const [users, setUsers] = useState<any[]>([]);
@@ -17,7 +19,7 @@ export default function AdminUsers() {
             const url = query
                 ? `${API_BASE}/admin/users?search=${encodeURIComponent(query)}&t=${Date.now()}`
                 : `${API_BASE}/admin/users?t=${Date.now()}`;
-            const res = await fetch(url, { cache: "no-store" });
+            const res = await fetch(url, { headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` }, cache: "no-store" });
             const data = await res.json();
             setUsers(data);
         } catch (err) {
@@ -34,7 +36,8 @@ export default function AdminUsers() {
     const handleToggleVip = async (userId: string, isVip: boolean) => {
         try {
             const res = await fetch(`${API_BASE}/admin/users/${userId}/vip?is_vip=${isVip}`, {
-                method: "PUT"
+                method: "PUT",
+                headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` }
             });
             if (!res.ok) throw new Error("設定失敗");
             alert(isVip ? "已設為 VIP 會員" : "已取消 VIP 資格");

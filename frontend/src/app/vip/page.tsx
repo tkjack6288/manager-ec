@@ -6,12 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function VIPPage() {
-    const [claimed, setClaimed] = useState(false);
-
-    const handleClaim = () => {
-        // 實務上這裡會打 API 去改變使用者的狀態或塞禮物卡
-        setClaimed(true);
-    };
+    const [claimed] = useState(false);
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-20 relative overflow-hidden">

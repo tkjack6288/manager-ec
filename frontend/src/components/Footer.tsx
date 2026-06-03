@@ -1,7 +1,37 @@
+"use client";
+
 import Link from "next/link";
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+import { useState } from "react";
+import axios from "axios";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "already">("idle");
+  const [message, setMessage] = useState("");
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setStatus("loading");
+    try {
+      const res = await axios.post("https://manager-ec-backend-164815154526.asia-east1.run.app/newsletter/subscribe", { email });
+      if (res.data.status === "already_subscribed") {
+        setStatus("already");
+        setMessage(res.data.message);
+      } else {
+        setStatus("success");
+        setMessage(res.data.message);
+        setEmail("");
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      setStatus("error");
+      setMessage("訂閱失敗，請檢查 Email 格式或稍後再試。");
+    }
+  };
+
   return (
     <footer className="bg-slate-900 overflow-hidden relative">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-moso-pink via-moso-gold to-moso-red"></div>
@@ -54,16 +84,26 @@ export default function Footer() {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-white">訂閱電子報</h4>
             <p className="text-slate-400 text-sm">輸入 Email 獲取最新優惠與 100 moso 幣！</p>
-            <form className="flex mt-2">
+            <form className="flex mt-2" onSubmit={handleSubscribe}>
               <input 
                 type="email" 
-                placeholder="您的 Email" 
+                placeholder="您的 Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
                 className="bg-slate-800 text-white text-sm rounded-l-md px-4 py-2 w-full focus:outline-none focus:ring-1 focus:ring-moso-pink"
               />
-              <button className="bg-gradient-to-r from-moso-pink to-moso-red text-white px-4 py-2 rounded-r-md hover:opacity-90 transition-opacity font-medium">
-                訂閱
+              <button 
+                type="submit" 
+                disabled={status === "loading"}
+                className="bg-gradient-to-r from-moso-pink to-moso-red text-white px-4 py-2 rounded-r-md hover:opacity-90 transition-opacity font-medium disabled:opacity-50"
+              >
+                {status === "loading" ? "處理中" : "訂閱"}
               </button>
             </form>
+            {status === "success" && <p className="text-moso-pink text-sm mt-2">{message}</p>}
+            {status === "already" && <p className="text-yellow-500 text-sm mt-2">{message}</p>}
+            {status === "error" && <p className="text-red-500 text-sm mt-2">{message}</p>}
           </div>
           
         </div>

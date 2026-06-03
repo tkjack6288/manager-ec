@@ -20,18 +20,26 @@ from routers.payment import cancel_ecpay_authorization
 from schemas.product import ProductResponse, ProductCreate
 from schemas.user import UserResponse
 from models.wallet import Wallet, WalletTransaction
-from core.dependencies import get_current_user
+from core.dependencies import get_current_user, get_current_admin
 
-# 如果需要驗證管理員身份，可以在 dependencies 加 get_current_admin
-# 目前簡化，暫時只檢查登入狀態或直接開放測試
-router = APIRouter(prefix="/admin", tags=["後台管理"])
+# 驗證管理員身份
+router = APIRouter(
+    prefix="/admin", 
+    tags=["後台管理"],
+    dependencies=[Depends(get_current_admin)]
+)
 
 # --- 檔案上傳 ---
 
 @router.post("/upload")
 async def upload_image(file: UploadFile = File(...)):
+    ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif'}
+    ext = os.path.splitext(file.filename)[1].lower()
+    
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="不允許的檔案格式，僅支援圖片上傳 (.jpg, .png, .webp, .gif)")
+        
     bucket_name = os.getenv("GCP_BUCKET_NAME")
-    ext = os.path.splitext(file.filename)[1]
     
     # 將圖片集中存放在 products/ 資料夾下
     gcp_filename = f"products/{uuid.uuid4().hex}{ext}"
@@ -271,7 +279,7 @@ def admin_confirm_return(order_id: str, db: Session = Depends(get_db)):
         load_dotenv(env_path)
 
         def send_return_confirm_email():
-            sender_email = "tkjack6288@gmail.com"
+            sender_email = "mososhop2020@gmail.com"
             recipient_email = user_email
             app_password = os.environ.get("GMAIL_APP_PASSWORD", "")
             
@@ -400,7 +408,7 @@ def admin_update_order_status(order_id: str, status: str, db: Session = Depends(
                     pass
 
             def send_review_invite_email():
-                sender_email = "tkjack6288@gmail.com"
+                sender_email = "mososhop2020@gmail.com"
                 recipient_email = user_email
                 app_password = os.environ.get("GMAIL_APP_PASSWORD", "")
                 

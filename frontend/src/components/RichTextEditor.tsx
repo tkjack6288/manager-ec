@@ -15,9 +15,10 @@ interface RichTextEditorProps {
     onChange: (value: string) => void;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || `https://manager-ec-backend-164815154526.asia-east1.run.app`;
 
 export default function RichTextEditor({ value, onChange }: RichTextEditorProps) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const quillRef = useRef<any>(null);
 
     // 自訂的圖片上傳處理器
@@ -35,7 +36,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
             const quill = quillRef.current?.getEditor();
             if (!quill) return;
 
-            let range = quill.getSelection(true);
+            const range = quill.getSelection(true);
 
             try {
                 // 使用迴圈依次上傳多張圖片並插入
@@ -46,6 +47,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
                     // 呼叫我們後端的上傳 API
                     const res = await fetch(`${API_BASE}/admin/upload`, {
                         method: "POST",
+                        headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` },
                         body: formData,
                     });
 
@@ -105,6 +107,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
                 }
             `}</style>
             <ReactQuill
+                // @ts-expect-error: ReactQuill types don't officially support ref, but it works at runtime
                 ref={quillRef}
                 theme="snow"
                 value={value}

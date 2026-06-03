@@ -18,7 +18,7 @@ def check_and_notify_returning_orders():
         # 尋找 returning 狀態的訂單
         orders = db.query(Order).filter(Order.status == "returning").all()
         
-        sender_email = "tkjack6288@gmail.com"
+        sender_email = "mososhop2020@gmail.com"
         app_password = os.environ.get("GMAIL_APP_PASSWORD", "")
         
         if not app_password:

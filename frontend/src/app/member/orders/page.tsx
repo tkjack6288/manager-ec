@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { motion } from "framer-motion";
@@ -65,7 +67,7 @@ export default function OrdersPage() {
     const [reviewedItems, setReviewedItems] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
-        axios.get("http://localhost:8000/admin/settings")
+        axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/admin/settings`)
             .then(res => {
                 if (res.data && res.data.review_reward_coin !== undefined) {
                     setRewardCoin(res.data.review_reward_coin);
@@ -83,7 +85,7 @@ export default function OrdersPage() {
 
         setLoading(true);
 
-        axios.get(`http://localhost:8000/orders/me?skip=0&limit=50&t=${Date.now()}`, {
+        axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/orders/me?skip=0&limit=50&t=${Date.now()}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => {
@@ -105,7 +107,7 @@ export default function OrdersPage() {
         try {
             setIsCancelling(true);
             const token = localStorage.getItem("token");
-            await axios.put(`http://localhost:8000/orders/${cancelModalOrder.id}/cancel`, {
+            await axios.put(`https://manager-ec-backend-164815154526.asia-east1.run.app/orders/${cancelModalOrder.id}/cancel`, {
                 cancel_reason: cancelReason,
                 cancel_note: cancelNote
             }, {
@@ -129,7 +131,7 @@ export default function OrdersPage() {
         try {
             setIsReturning(true);
             const token = localStorage.getItem("token");
-            await axios.put(`http://localhost:8000/orders/${returnModalOrder.id}/return`, {
+            await axios.put(`https://manager-ec-backend-164815154526.asia-east1.run.app/orders/${returnModalOrder.id}/return`, {
                 cancel_reason: returnReason,
                 cancel_note: returnReason === "其他" ? returnNote : ""
             }, {
@@ -152,7 +154,7 @@ export default function OrdersPage() {
         try {
             setIsCancellingReturn(true);
             const token = localStorage.getItem("token");
-            await axios.put(`http://localhost:8000/orders/${orderId}/return_cancel`, {}, {
+            await axios.put(`https://manager-ec-backend-164815154526.asia-east1.run.app/orders/${orderId}/return_cancel`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert("退貨申請已取消");
@@ -171,7 +173,7 @@ export default function OrdersPage() {
         try {
             setIsSubmittingReview(true);
             const token = localStorage.getItem("token");
-            await axios.post(`http://localhost:8000/products/${reviewModalItem.product_id}/reviews`, {
+            await axios.post(`https://manager-ec-backend-164815154526.asia-east1.run.app/products/${reviewModalItem.product_id}/reviews`, {
                 order_item_id: reviewModalItem.id,
                 rating: reviewRating,
                 comment: reviewComment
@@ -273,7 +275,7 @@ export default function OrdersPage() {
                                             <div className="flex gap-2">
                                                 {(order.status === "pending" || order.status === "處理中") && (order.payment_method === "ecpay" || order.payment_method === "綠界") && (
                                                     <a
-                                                        href={`http://localhost:8000/payments/ecpay/checkout/${order.id}?t=${Date.now()}`}
+                                                        href={`https://manager-ec-backend-164815154526.asia-east1.run.app/payments/ecpay/checkout/${order.id}?t=${Date.now()}`}
                                                         className="px-4 py-1.5 bg-moso-pink hover:bg-moso-red text-white text-sm font-medium rounded-full transition-colors whitespace-nowrap shadow-sm"
                                                     >
                                                         前往綠界結帳

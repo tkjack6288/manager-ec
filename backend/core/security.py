@@ -3,8 +3,11 @@ import jwt
 import bcrypt
 import os
 
+import secrets
+
 # JWT 配置
-SECRET_KEY = os.getenv("SECRET_KEY", "mososhop_super_secret_dev_key")
+# 若未設定環境變數，則動態產生一個隨機密鑰，避免使用硬編碼的靜態密鑰
+SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
 

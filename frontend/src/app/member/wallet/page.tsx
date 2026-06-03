@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { motion } from "framer-motion";
@@ -32,7 +33,7 @@ export default function MemberWalletPage() {
         // 呼叫真實 API 取得錢包資料
         const token = localStorage.getItem("token");
         if (token) {
-            axios.get(`http://localhost:8000/wallets/me?t=${Date.now()}`, {
+            axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/wallets/me?t=${Date.now()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
                 .then(res => {

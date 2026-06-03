@@ -13,6 +13,7 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
     id: str
     auth_provider: str
+    is_admin: bool
     is_vip: bool
     vip_expires_at: Optional[datetime] = None
     created_at: datetime

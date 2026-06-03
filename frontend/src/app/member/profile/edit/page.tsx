@@ -53,7 +53,7 @@ export default function ProfileEditPage() {
             const token = localStorage.getItem("token");
             if (token) {
                 // 同步更新至後端資料庫
-                const res = await fetch("http://localhost:8000/users/me", {
+                const res = await fetch(`https://manager-ec-backend-164815154526.asia-east1.run.app/users/me`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",

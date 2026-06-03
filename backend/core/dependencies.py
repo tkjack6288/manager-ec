@@ -41,3 +41,12 @@ def get_optional_current_user(token: str = Depends(oauth2_scheme_optional), db: 
         return user
     except jwt.PyJWTError:
         return None
+
+def get_current_admin(current_user: User = Depends(get_current_user)):
+    """依賴函式：確認當前使用者是否有管理員權限"""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="權限不足，必須為管理員",
+        )
+    return current_user

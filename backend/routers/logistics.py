@@ -18,9 +18,9 @@ def logistics_map(subtype: str, request: Request):
     if subtype not in ["UNIMART", "FAMI"]:
         return HTMLResponse(content="Invalid subtype", status_code=400)
 
-    # 取得本機 API 位址 (避免 localhost 被轉跳到不正確的 origin)
-    host = request.headers.get("host", "localhost:8000")
-    reply_url = f"http://{host}/logistics/map/callback"
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("x-forwarded-host", request.url.netloc)
+    reply_url = f"{scheme}://{host}/logistics/map/callback"
     
     html_content = f"""
     <!DOCTYPE html>

@@ -1,36 +1,33 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Heart, Star, Flame, Gift } from "lucide-react";
+import { ShoppingCart, Heart, Star, Flame, Gift, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function Home() {
-  const [recommendations, setRecommendations] = useState<any[]>([]);
-  const [bannerItems, setBannerItems] = useState<any[]>([]);
-  const [currentBanner, setCurrentBanner] = useState(0);
-
-  useEffect(() => {
-    // 預設 Banner 資料（作為 fallback）
-    const defaultBanners = [
-      { id: "b1", title: "探索你的無極限購物體驗", subtitle: "限時購物季限定", desc: "買東西賺 10% Moso 幣，全額扣抵無上限。加入 VIP，馬上免除年費挑戰最高回饋。", img: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2000", reward: 1000 },
-      { id: "b2", title: "春季新品發表優惠", subtitle: "全館免運", desc: "最新流行服飾與生活質感單品，限時8折起，結帳輸入折扣碼 SPRING 享額外優惠。", img: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=2000", reward: 500 },
-      { id: "b3", title: "智慧家電升級大賞", subtitle: "回饋最高20%", desc: "精選3C與質感家電，購買指定品牌加碼送原廠配件，讓您的生活更聰明。", img: "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=2000", reward: 1200 }
-    ];
-    setBannerItems(defaultBanners);
-
-    // 先顯示假資料
-    setRecommendations([
+  const [recommendations, setRecommendations] = useState<any[]>([
       { id: "1", name: "頂級降噪藍牙耳機 Pro", category: "3C家電", selling_price: 8388, price: 6990, images: "[\"https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&q=80&w=800\"]", rating: 4.8 },
       { id: "2", name: "微分子保濕精華液 50ml", category: "美妝保養", selling_price: 1536, price: 1280, images: "[\"https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=800\"]", rating: 4.9 },
       { id: "3", name: "極究人體工學辦公椅", category: "傢俱", selling_price: 5400, price: 4500, images: "[\"https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&q=80&w=800\"]", rating: 4.5 },
       { id: "4", name: "手沖咖啡器具套裝", category: "日用生活", selling_price: 3576, price: 2980, images: "[\"https://images.unsplash.com/photo-1495474472205-51f753c07f46?auto=format&fit=crop&q=80&w=800\"]", rating: 4.7 }
-    ]);
+  ]);
+  const [bannerItems, setBannerItems] = useState<any[]>([
+      { id: "b1", title: "探索你的無極限購物體驗", subtitle: "限時購物季限定", desc: "買東西賺 10% Moso 幣，全額扣抵無上限。加入 VIP，馬上免除年費挑戰最高回饋。", img: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2000", reward: 1000 },
+      { id: "b2", title: "春季新品發表優惠", subtitle: "全館免運", desc: "最新流行服飾與生活質感單品，限時8折起，結帳輸入折扣碼 SPRING 享額外優惠。", img: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=2000", reward: 500 },
+      { id: "b3", title: "智慧家電升級大賞", subtitle: "回饋最高20%", desc: "精選3C與質感家電，購買指定品牌加碼送原廠配件，讓您的生活更聰明。", img: "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=2000", reward: 1200 }
+  ]);
+  const [currentBanner, setCurrentBanner] = useState(0);
+
+  useEffect(() => {
 
     // 透過 API 取得 GCP 資料庫內的商品資料
-    axios.get("http://localhost:8000/products/recommendations/daily")
+    axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/products/recommendations/daily`)
       .then(res => {
         if (res.data && res.data.length > 0) {
           setRecommendations(res.data);
@@ -162,6 +159,29 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Shopping Advisor Promo Section */}
+      <section className="py-12 bg-gradient-to-r from-moso-pink to-moso-red relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=2000')] opacity-10 mix-blend-overlay bg-cover bg-center"></div>
+        <div className="container mx-auto px-4 md:px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-white">
+            <h2 className="text-3xl font-extrabold mb-2 flex items-center gap-3">
+              <Sparkles className="text-yellow-300" size={32} />
+              不知道該買什麼嗎？
+            </h2>
+            <p className="text-white/90 text-lg max-w-2xl">
+              體驗全新升級的「私人購物顧問」服務！只要告訴我們您的需求、預算或送禮對象，我們就能為您從海量商品中精準挑選最適合的專屬選擇。
+            </p>
+          </div>
+          <button 
+            onClick={() => document.getElementById('chat-widget-trigger')?.click()}
+            className="shrink-0 bg-white text-moso-red font-bold text-lg py-4 px-8 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center gap-2"
+          >
+            <Sparkles size={20} className="text-moso-pink" />
+            立即開啟專屬諮詢
+          </button>
+        </div>
+      </section>
+
       {/* Category Section */}
       <section className="py-16 bg-white dark:bg-slate-900">
         <div className="container mx-auto px-4 md:px-6">
@@ -173,12 +193,12 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {[
-              { name: "3C家電", img: "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=150" },
-              { name: "美妝保養", img: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=150" },
-              { name: "流行服飾", img: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=150" },
-              { name: "日用生活", img: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=150" },
-              { name: "運動休閒", img: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=150" },
-              { name: "美食生鮮", img: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=150" }
+              { name: "3C 科技", img: "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=150" },
+              { name: "保健美容", img: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=150" },
+              { name: "服飾時尚", img: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=150" },
+              { name: "家具餐廚", img: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=150" },
+              { name: "運動戶外", img: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=150" },
+              { name: "食品飲料", img: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=150" }
             ].map((cat, idx) => (
               <Link href={`/category/${encodeURIComponent(cat.name)}`} key={idx} className="block">
                 <motion.div

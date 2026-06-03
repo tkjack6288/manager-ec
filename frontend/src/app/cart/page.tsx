@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { motion } from "framer-motion";
@@ -25,6 +28,15 @@ export default function CartPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userMosoCoin, setUserMosoCoin] = useState(0);
 
+  const [mosoCoinAmount, setMosoCoinAmount] = useState<number | ''>('');
+  const [shippingName, setShippingName] = useState("");
+  const [shippingPhone, setShippingPhone] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingType, setShippingType] = useState("home"); // home, UNIMART, FAMI
+  const [storeId, setStoreId] = useState("");
+  const [storeName, setStoreName] = useState("");
+  const [note, setNote] = useState("");
+
   useEffect(() => {
     const cartStr = localStorage.getItem("moso_cart");
     if (cartStr) {
@@ -44,7 +56,7 @@ export default function CartPage() {
 
   useEffect(() => {
     // 取得中台設定的免運門檻與運費
-    axios.get("http://localhost:8000/admin/settings")
+    axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/admin/settings`)
       .then(res => {
         if (res.data) {
           setShippingSettings({
@@ -63,7 +75,7 @@ export default function CartPage() {
     const token = localStorage.getItem("token");
     if (token) {
       setIsLoggedIn(true);
-      axios.get("http://localhost:8000/wallets/me", {
+      axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/wallets/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => {
@@ -117,18 +129,8 @@ export default function CartPage() {
 
   const subtotalWithShipping = totalAmount + actualShippingFee;
 
-  const [mosoCoinAmount, setMosoCoinAmount] = useState<number | ''>('');
-
-  const [shippingName, setShippingName] = useState("");
-  const [shippingPhone, setShippingPhone] = useState("");
-  const [shippingAddress, setShippingAddress] = useState("");
-  const [shippingType, setShippingType] = useState("home"); // home, UNIMART, FAMI
-  const [storeId, setStoreId] = useState("");
-  const [storeName, setStoreName] = useState("");
-  const [note, setNote] = useState("");
-
   const openMap = (subtype: string) => {
-    window.open(`http://localhost:8000/logistics/map/${subtype}`, "map", "width=800,height=600");
+    window.open(`https://manager-ec-backend-164815154526.asia-east1.run.app/logistics/map/${subtype}`, "map", "width=800,height=600");
   };
 
   const actualMosoToUse = useMosoCoin ? (mosoCoinAmount === '' ? Math.min(subtotalWithShipping, userMosoCoin) : Math.min(subtotalWithShipping, userMosoCoin, Number(mosoCoinAmount))) : 0;
@@ -186,7 +188,7 @@ export default function CartPage() {
         store_name: storeName
       };
 
-      const res = await axios.post("http://localhost:8000/orders/", orderPayload, {
+      const res = await axios.post(`https://manager-ec-backend-164815154526.asia-east1.run.app/orders/`, orderPayload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -197,7 +199,7 @@ export default function CartPage() {
 
         if (res.data.payment_method === "ecpay") {
           // 導向後端的綠界結帳轉跳頁面 (加上 timestamp 避免被快取舊的表單)
-          window.location.href = `http://localhost:8000/payments/ecpay/checkout/${res.data.id}?t=${Date.now()}`;
+          window.location.href = `https://manager-ec-backend-164815154526.asia-east1.run.app/payments/ecpay/checkout/${res.data.id}?t=${Date.now()}`;
         } else {
           // 全額折抵，直接成功
           alert("結帳成功！已使用 Moso 幣全額折抵。");

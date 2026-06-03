@@ -68,7 +68,7 @@ export default function SettingsPage() {
                     return;
                 }
 
-                const res = await fetch("http://localhost:8000/users/change-password", {
+                const res = await fetch(`https://manager-ec-backend-164815154526.asia-east1.run.app/users/change-password`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",

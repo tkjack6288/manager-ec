@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,7 +13,7 @@ export default function AdminReviewsPage() {
 
     const fetchReviews = () => {
         setLoading(true);
-        axios.get("http://localhost:8000/admin/reviews")
+        axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/admin/reviews`)
             .then(res => {
                 setReviews(res.data);
                 setLoading(false);
@@ -28,7 +31,7 @@ export default function AdminReviewsPage() {
     const handleDelete = async (id: string) => {
         if (!confirm("確定要刪除這筆評價嗎？此動作無法復原。")) return;
         try {
-            await axios.delete(`http://localhost:8000/admin/reviews/${id}`);
+            await axios.delete(`https://manager-ec-backend-164815154526.asia-east1.run.app/admin/reviews/${id}`);
             fetchReviews();
             alert("評價已刪除");
         } catch (err: any) {

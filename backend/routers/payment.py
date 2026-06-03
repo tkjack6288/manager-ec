@@ -15,11 +15,25 @@ HASH_KEY = "sOlG7lIXmMQIwizh"
 HASH_IV = "WN4Aov7OVQCSSCTx"
 
 @router.get("/ecpay/checkout/{order_id}", response_class=HTMLResponse)
-def ecpay_checkout(order_id: str, db: Session = Depends(get_db)):
+def ecpay_checkout(request: Request, order_id: str, db: Session = Depends(get_db)):
     """產生綠界結帳跳轉頁面"""
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order or order.status != "pending":
         raise HTTPException(status_code=400, detail="Order not valid for ECPay")
+
+    # 取得前端的 Domain Name，做為結帳完成返回的網址
+    referer = request.headers.get("referer")
+    if referer:
+        parsed_uri = urllib.parse.urlparse(referer)
+        frontend_url = f"{parsed_uri.scheme}://{parsed_uri.netloc}"
+    else:
+        # Fallback 到雲端前台網址
+        frontend_url = "https://manager-ec-frontend-164815154526.asia-east1.run.app"
+
+    # 取得後端的 Domain Name，做為綠界 Webhook 回呼網址
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("x-forwarded-host", request.url.netloc)
+    backend_url = f"{scheme}://{host}"
 
     # 綠界規定日期格式: yyyy/MM/dd HH:mm:ss
     now = datetime.now()
@@ -41,9 +55,9 @@ def ecpay_checkout(order_id: str, db: Session = Depends(get_db)):
         "TotalAmount": int(order.final_paid),
         "TradeDesc": "Mososhop_Order",
         "ItemName": "Mososhop_Products",
-        "ReturnURL": "http://localhost:8000/payments/ecpay/webhook",
+        "ReturnURL": f"{backend_url}/payments/ecpay/webhook",
         # 結帳成功後跳轉回訂單頁面
-        "ClientBackURL": "http://localhost:8080/member/orders",
+        "ClientBackURL": f"{frontend_url}/member/orders",
         "ChoosePayment": "ALL",
         "EncryptType": 1,
         # 將真實的 UUID 藏在 CustomField1 內傳遞

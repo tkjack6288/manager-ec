@@ -42,7 +42,7 @@ def get_products(db: Session = Depends(get_db), category: str = Query(None), nam
     """取得商品清單，可根據分類、名稱、價格區間進行篩選，並排除金額為 0 的商品"""
     query = db.query(Product).filter(Product.is_active == True, Product.is_sellable == True, Product.selling_price > 0)
     if category:
-        query = query.filter(Product.category == category)
+        query = query.filter(Product.category.ilike(f"%{category}%"))
     if name:
         query = query.filter(Product.name.ilike(f"%{name}%"))
     if min_price is not None:

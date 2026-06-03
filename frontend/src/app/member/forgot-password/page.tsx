@@ -14,7 +14,7 @@ export default function ForgotPasswordPage() {
         setIsLoading(true);
 
         try {
-            const response = await fetch("http://localhost:8000/users/forgot-password", {
+            const response = await fetch(`https://manager-ec-backend-164815154526.asia-east1.run.app/users/forgot-password`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

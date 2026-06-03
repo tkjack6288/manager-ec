@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
 import { Save, RefreshCw, Settings, Store, CreditCard, ShieldAlert, Truck } from "lucide-react";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = `https://manager-ec-backend-164815154526.asia-east1.run.app`;
 
 export default function AdminSettings() {
     const [settings, setSettings] = useState({
@@ -25,7 +26,9 @@ export default function AdminSettings() {
     const fetchSettings = async () => {
         try {
             setLoading(true);
-            const res = await fetch(`${API_BASE}/admin/settings`);
+            const res = await fetch(`${API_BASE}/admin/settings`, {
+                headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` }
+            });
             const data = await res.json();
             setSettings(data);
         } catch (err) {
@@ -44,7 +47,10 @@ export default function AdminSettings() {
             setSaving(true);
             const res = await fetch(`${API_BASE}/admin/settings`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("adminToken")}`
+                },
                 body: JSON.stringify(settings)
             });
             if (!res.ok) throw new Error("儲存失敗");

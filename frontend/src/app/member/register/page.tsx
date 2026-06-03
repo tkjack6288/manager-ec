@@ -33,7 +33,7 @@ export default function RegisterPage() {
         }
 
         try {
-            const res = await fetch("http://localhost:8000/users/register", {
+            const res = await fetch(`https://manager-ec-backend-164815154526.asia-east1.run.app/users/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

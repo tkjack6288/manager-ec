@@ -15,7 +15,7 @@ export default function LoginPage() {
 
         try {
             // 呼叫後端登入 API
-            const response = await fetch("http://localhost:8000/users/login", {
+            const response = await fetch(`https://manager-ec-backend-164815154526.asia-east1.run.app/users/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -35,7 +35,7 @@ export default function LoginPage() {
             localStorage.setItem("token", data.access_token);
 
             // 獲取會員資料
-            const userResponse = await fetch("http://localhost:8000/users/me", {
+            const userResponse = await fetch(`https://manager-ec-backend-164815154526.asia-east1.run.app/users/me`, {
                 headers: {
                     "Authorization": `Bearer ${data.access_token}`
                 }

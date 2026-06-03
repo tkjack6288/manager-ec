@@ -23,6 +23,7 @@ export default function MemberProfilePage() {
         const savedData = localStorage.getItem("memberData");
         if (savedData) {
             const parsedData = JSON.parse(savedData);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setMemberData(prev => ({
                 ...prev,
                 name: parsedData.name,
@@ -33,7 +34,7 @@ export default function MemberProfilePage() {
         // 呼叫 API 取得真實的 Moso 幣餘額
         const token = localStorage.getItem("token");
         if (token) {
-            axios.get(`http://localhost:8000/wallets/me?t=${Date.now()}`, {
+            axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/wallets/me?t=${Date.now()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => {

@@ -27,7 +27,7 @@ export default function Header() {
       if (cartStr) {
         try {
           const cartItems = JSON.parse(cartStr);
-          const count = cartItems.reduce((acc: number, item: any) => acc + item.quantity, 0);
+          const count = cartItems.reduce((acc: number, item: { quantity: number }) => acc + item.quantity, 0);
           setCartCount(count);
         } catch (e) {
           console.error(e);

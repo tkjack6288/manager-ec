@@ -12,7 +12,7 @@ export default function ShippingInfoPage() {
   });
 
   useEffect(() => {
-    fetch('http://localhost:8000/admin/settings')
+    fetch(`https://manager-ec-backend-164815154526.asia-east1.run.app/admin/settings`)
       .then(res => res.json())
       .then(data => {
         if (data) {

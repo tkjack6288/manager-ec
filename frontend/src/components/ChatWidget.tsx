@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { MessageCircle, X, Send, Sparkles, User } from "lucide-react";
 import axios from "axios";
 
 interface Message {
@@ -13,7 +13,7 @@ interface Message {
 export default function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { role: "model", content: "您好！我是 Moso Shop 客服助理，有什麼我可以幫忙的嗎？" }
+        { role: "model", content: "您好！我是您的專屬私人購物顧問 ✨\n請問您今天想找什麼樣的商品？我可以記錄您的需求並為您推薦最適合的選擇喔！" }
     ]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -40,7 +40,7 @@ export default function ChatWidget() {
 
         try {
             const token = localStorage.getItem("token");
-            const res = await axios.post("http://localhost:8000/chat", {
+            const res = await axios.post(`https://manager-ec-backend-164815154526.asia-east1.run.app/chat`, {
                 messages: updatedMessages
             }, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -63,6 +63,37 @@ export default function ChatWidget() {
         }
     };
 
+    const renderMessage = (content: string) => {
+        const parts = [];
+        let lastIndex = 0;
+        const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+        let match;
+
+        while ((match = regex.exec(content)) !== null) {
+            if (match.index > lastIndex) {
+                parts.push(content.substring(lastIndex, match.index));
+            }
+            parts.push(
+                <a 
+                    key={match.index} 
+                    href={match[2]} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-moso-pink hover:text-moso-red underline font-bold"
+                >
+                    {match[1]}
+                </a>
+            );
+            lastIndex = regex.lastIndex;
+        }
+
+        if (lastIndex < content.length) {
+            parts.push(content.substring(lastIndex));
+        }
+
+        return parts;
+    };
+
     return (
         <div className="fixed bottom-6 right-6 z-50">
             <AnimatePresence>
@@ -77,8 +108,8 @@ export default function ChatWidget() {
                         {/* Header */}
                         <div className="bg-moso-pink text-white p-4 flex justify-between items-center">
                             <div className="flex items-center gap-2">
-                                <Bot size={20} />
-                                <h3 className="font-bold">線上客服</h3>
+                                <Sparkles size={20} />
+                                <h3 className="font-bold">私人購物顧問</h3>
                             </div>
                             <button 
                                 onClick={() => setIsOpen(false)}
@@ -96,21 +127,21 @@ export default function ChatWidget() {
                                     className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "self-end flex-row-reverse" : "self-start"}`}
                                 >
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-slate-200 dark:bg-slate-700" : "bg-moso-pink/20 text-moso-pink"}`}>
-                                        {msg.role === "user" ? <User size={16} className="text-slate-500 dark:text-slate-300" /> : <Bot size={16} />}
+                                        {msg.role === "user" ? <User size={16} className="text-slate-500 dark:text-slate-300" /> : <Sparkles size={16} />}
                                     </div>
                                     <div className={`p-3 rounded-2xl text-sm ${
                                         msg.role === "user" 
                                             ? "bg-moso-pink text-white rounded-tr-none" 
                                             : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm border border-slate-100 dark:border-slate-700 rounded-tl-none"
                                     }`}>
-                                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                        <p className="whitespace-pre-wrap leading-relaxed">{msg.role === "model" ? renderMessage(msg.content) : msg.content}</p>
                                     </div>
                                 </div>
                             ))}
                             {isLoading && (
                                 <div className="flex gap-3 max-w-[85%] self-start">
                                     <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-moso-pink/20 text-moso-pink">
-                                        <Bot size={16} />
+                                        <Sparkles size={16} />
                                     </div>
                                     <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-tl-none flex items-center gap-1">
                                         <motion.div className="w-2 h-2 bg-slate-300 rounded-full" animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} />

@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { motion } from "framer-motion";
@@ -25,7 +27,7 @@ function SearchContent() {
   const fetchData = () => {
     if (!query) return;
     setIsSearching(true);
-    let url = `http://localhost:8000/products/?skip=0&limit=50&name=${encodeURIComponent(query)}&sort=${sort}`;
+    let url = `https://manager-ec-backend-164815154526.asia-east1.run.app/products/?skip=0&limit=50&name=${encodeURIComponent(query)}&sort=${sort}`;
     if (minPrice) {
       url += `&min_price=${Number(minPrice)}`;
     }
@@ -46,6 +48,7 @@ function SearchContent() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, sort]);
 
   return (
@@ -95,7 +98,7 @@ function SearchContent() {
                       setMinPrice("");
                       setMaxPrice("");
                       setIsFilterOpen(false);
-                      let url = `http://localhost:8000/products/?skip=0&limit=50&name=${encodeURIComponent(query)}&sort=${sort}`;
+                      const url = `https://manager-ec-backend-164815154526.asia-east1.run.app/products/?skip=0&limit=50&name=${encodeURIComponent(query)}&sort=${sort}`;
                       fetch(url)
                         .then(res => res.json())
                         .then(data => setResults(data));

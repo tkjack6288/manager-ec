@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { motion } from "framer-motion";
@@ -26,7 +28,7 @@ export default function ProductsPage() {
 
     const fetchProducts = (pageNum: number, currentSort: string) => {
         setLoading(true);
-        let url = `http://localhost:8000/products/?skip=${(pageNum - 1) * limit}&limit=${limit}&sort=${currentSort}`;
+        let url = `https://manager-ec-backend-164815154526.asia-east1.run.app/products/?skip=${(pageNum - 1) * limit}&limit=${limit}&sort=${currentSort}`;
         if (minPrice) {
             url += `&min_price=${Number(minPrice)}`;
         }
@@ -48,8 +50,10 @@ export default function ProductsPage() {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPage(1);
         fetchProducts(1, sort);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sort]);
 
     const loadMore = () => {
@@ -117,7 +121,7 @@ export default function ProductsPage() {
                                             // Call fetch outside to avoid stale state issues, or just let useEffect handle it if we want.
                                             // But since we just reset state, we can do it manually:
                                             setLoading(true);
-                                            axios.get(`http://localhost:8000/products/?skip=0&limit=${limit}&sort=${sort}`)
+                                            axios.get(`https://manager-ec-backend-164815154526.asia-east1.run.app/products/?skip=0&limit=${limit}&sort=${sort}`)
                                                 .then(res => {
                                                     setProducts(res.data);
                                                     setHasMore(res.data.length === limit);

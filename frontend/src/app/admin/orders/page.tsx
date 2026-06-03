@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
 import { Search, Filter, Eye, DollarSign, Truck, CheckCircle, Clock } from "lucide-react";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = `https://manager-ec-backend-164815154526.asia-east1.run.app`;
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -13,7 +14,8 @@ export default function AdminOrders() {
     try {
       setLoading(true);
       const res = await fetch(`${API_BASE}/admin/orders?t=${Date.now()}`, {
-        cache: "no-store"
+        cache: "no-store",
+        headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` }
       });
       const data = await res.json();
       setOrders(data);
@@ -46,8 +48,10 @@ export default function AdminOrders() {
     if (!confirm(`確定要將狀態改為「${getStatusText(newStatus)}」嗎？`)) return;
     try {
       const res = await fetch(`${API_BASE}/admin/orders/${orderId}/status?status=${newStatus}`, {
-        method: "PUT"
+        method: "PUT",
+        headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` }
       });
+
       if (!res.ok) throw new Error("更新失敗");
       alert("訂單狀態已更新");
       fetchOrders();
@@ -75,8 +79,10 @@ export default function AdminOrders() {
     if (!confirm("確定確認收貨無誤，並執行退款作業嗎？")) return;
     try {
       const res = await fetch(`${API_BASE}/admin/orders/${orderId}/return_confirm`, {
-        method: "PUT"
+        method: "POST",
+        headers: { "Authorization": `Bearer ${localStorage.getItem("adminToken")}` }
       });
+
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.detail || "操作失敗");

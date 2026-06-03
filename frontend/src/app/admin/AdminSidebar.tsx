@@ -58,7 +58,13 @@ export default function AdminSidebar() {
             </nav>
 
             <div className="p-4 border-t border-slate-800">
-                <button className="flex items-center gap-3 px-4 py-3 w-full hover:bg-red-500/10 hover:text-red-400 rounded-xl font-medium transition-colors text-left text-slate-400">
+                <button 
+                    onClick={() => {
+                        localStorage.removeItem("adminToken");
+                        localStorage.removeItem("adminData");
+                        window.location.href = "/admin/login";
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 w-full hover:bg-red-500/10 hover:text-red-400 rounded-xl font-medium transition-colors text-left text-slate-400">
                     <LogOut size={20} />
                     登出系統
                 </button>

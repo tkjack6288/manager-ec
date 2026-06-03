@@ -173,21 +173,19 @@ def create_order(req: OrderCreate, current_user: User = Depends(get_current_user
 
     # 5. 背景發送訂單通知信
     def send_order_email():
-        sender_email = "tkjack6288@gmail.com" # 與 user.py 同一個寄件者設定
-        recipient_email = "tkjack6288@gmail.com"
+        sender_email = "mososhop2020@gmail.com"
+        user_email = current_user.email
+        admin_email = "mososhop2020@gmail.com"
         app_password = os.environ.get("GMAIL_APP_PASSWORD", "")
         
         if not app_password:
             print("GMAIL_APP_PASSWORD 未設定，略過寄信")
             return
             
-        message = MIMEMultipart()
-        message['From'] = sender_email
-        message['To'] = recipient_email
-        message['Subject'] = f'【Moso Shop】新訂單成立通知 (編號: {new_order.id})'
-        
-        items_str = "\n".join([f"- 商品ID: {oi.product_id} x {oi.quantity} (小計: NT$ {int(oi.subtotal)})" for oi in order_items_db])
-        body = f"""您好，系統收到一筆新的訂單！
+        items_str = "\n".join([f"- 商品名稱: {oi.product.name if oi.product else oi.product_id} x {oi.quantity} (小計: NT$ {int(oi.subtotal)})" for oi in order_items_db])
+        body = f"""親愛的 {current_user.name} 您好，
+
+系統已收到您的一筆新訂單！
 
 訂單編號：{new_order.id}
 訂單金額：NT$ {int(new_order.total_amount)}
@@ -198,14 +196,31 @@ Moso幣折抵：NT$ {int(new_order.moso_coin_used)}
 商品明細：
 {items_str}
 
-請前往管理員後台查看訂單詳情處理。"""
+感謝您的購買！
+Mososhop 團隊 敬上"""
 
-        message.attach(MIMEText(body, 'plain', 'utf-8'))
         try:
             server = smtplib.SMTP('smtp.gmail.com', 587)
             server.starttls()
             server.login(sender_email, app_password)
-            server.sendmail(sender_email, recipient_email, message.as_string())
+            
+            # 寄給客戶
+            if user_email:
+                message_user = MIMEMultipart()
+                message_user['From'] = sender_email
+                message_user['To'] = user_email
+                message_user['Subject'] = f'【Mososhop】新訂單成立通知 (編號: {new_order.id})'
+                message_user.attach(MIMEText(body, 'plain', 'utf-8'))
+                server.sendmail(sender_email, user_email, message_user.as_string())
+                
+            # 寄給管理員
+            message_admin = MIMEMultipart()
+            message_admin['From'] = sender_email
+            message_admin['To'] = admin_email
+            message_admin['Subject'] = f'【Mososhop管理通知】新訂單成立通知 (編號: {new_order.id})'
+            message_admin.attach(MIMEText(body, 'plain', 'utf-8'))
+            server.sendmail(sender_email, admin_email, message_admin.as_string())
+            
             server.quit()
         except Exception as e:
             print(f"SMTP Email send error: {e}")
@@ -420,8 +435,8 @@ def return_order(order_id: str, req: OrderCancelRequest, current_user: User = De
         load_dotenv(env_path)
 
         def send_return_applied_email():
-            sender_email = "tkjack6288@gmail.com"
-            admin_email = "tkjack6288@gmail.com"
+            sender_email = "mososhop2020@gmail.com"
+            admin_email = "mososhop2020@gmail.com"
             recipient_email = user_email
             app_password = os.environ.get("GMAIL_APP_PASSWORD", "")
             
@@ -538,8 +553,8 @@ def cancel_return_order(order_id: str, current_user: User = Depends(get_current_
         load_dotenv(env_path)
 
         def send_return_cancel_email():
-            sender_email = "tkjack6288@gmail.com"
-            admin_email = "tkjack6288@gmail.com"
+            sender_email = "mososhop2020@gmail.com"
+            admin_email = "mososhop2020@gmail.com"
             recipient_email = user_email
             app_password = os.environ.get("GMAIL_APP_PASSWORD", "")
             

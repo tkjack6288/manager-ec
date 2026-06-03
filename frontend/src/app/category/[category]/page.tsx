@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { motion } from "framer-motion";
@@ -23,7 +25,7 @@ export default function CategoryPage() {
   };
 
   const fetchData = () => {
-    let url = `http://localhost:8000/products/?skip=0&limit=50&category=${encodeURIComponent(categoryName)}&sort=${sort}`;
+    let url = `https://manager-ec-backend-164815154526.asia-east1.run.app/products/?skip=0&limit=50&category=${encodeURIComponent(categoryName)}&sort=${sort}`;
     if (minPrice) {
       url += `&min_price=${Number(minPrice)}`;
     }
@@ -42,6 +44,7 @@ export default function CategoryPage() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryName, sort]);
 
   return (
@@ -100,7 +103,7 @@ export default function CategoryPage() {
                       setMinPrice("");
                       setMaxPrice("");
                       setIsFilterOpen(false);
-                      let url = `http://localhost:8000/products/?skip=0&limit=50&category=${encodeURIComponent(categoryName)}&sort=${sort}`;
+                      const url = `https://manager-ec-backend-164815154526.asia-east1.run.app/products/?skip=0&limit=50&category=${encodeURIComponent(categoryName)}&sort=${sort}`;
                       fetch(url)
                         .then(res => res.json())
                         .then(data => setProducts(data));

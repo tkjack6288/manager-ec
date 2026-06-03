@@ -5,6 +5,7 @@ import os
 from database import get_db
 from models.user import User
 from models.order import Order, OrderItem
+from models.product import Product
 from core.dependencies import get_optional_current_user
 
 try:
@@ -22,7 +23,7 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     messages: list[ChatMessage]
 
-@router.post("/")
+@router.post("")
 def chat_with_bot(req: ChatRequest, current_user: User | None = Depends(get_optional_current_user), db: Session = Depends(get_db)):
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -36,9 +37,25 @@ def chat_with_bot(req: ChatRequest, current_user: User | None = Depends(get_opti
         
         # 建立基礎 System Instruction
         system_instruction = (
-            "你是一位親切、專業的 Moso Shop 電商客服人員，請務必一律使用繁體中文（zh-TW）回覆。"
-            "請回答使用者的問題，可以根據一般電商規則（例如：1 Moso幣 = 1台幣）給予禮貌的回應。"
+            "你是一位親切、專業的一對一私人購物顧問，負責在 Moso Shop 電商平台為顧客提供專屬的購物建議。請一律使用繁體中文（zh-TW）回覆。\n"
+            "你的任務是：\n"
+            "1. 主動並有禮貌地詢問顧客的需求（例如：送禮或自用、預算範圍、偏好風格等）。\n"
+            "2. 記下顧客在對話中透露的資訊，並根據這些線索，從【站內商品型錄】挑選最合適的商品推薦給他們。\n"
+            "3. 每次推薦商品時，必須使用 Markdown 連結格式：`[商品名稱](/product/商品ID)`，讓顧客可以直接點擊查看詳情。例如：推薦您這款 [商品名稱](/product/123-456-789)。\n"
+            "4. 回答必須保持顧問的專業與親切感，絕不要像死板的機器人。"
         )
+        
+        # 載入站內有效商品列表
+        products = db.query(Product).filter(Product.is_active == True, Product.is_sellable == True).all()
+        if products:
+            product_catalog = "\n\n【站內商品型錄】（請優先從以下清單為顧客挑選推薦）：\n"
+            for p in products:
+                desc_snippet = p.description[:60] + "..." if p.description and len(p.description) > 60 else (p.description or "無描述")
+                # 濾除 HTML 標籤
+                import re
+                desc_snippet = re.sub(r'<[^>]+>', '', desc_snippet)
+                product_catalog += f"- [{p.name}](/product/{p.id}) | 價格: NT${int(p.selling_price)} | 簡介: {desc_snippet}\n"
+            system_instruction += product_catalog
         
         # 動態注入使用者的即時訂單資訊
         if current_user:
