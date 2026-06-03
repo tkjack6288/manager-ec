@@ -32,6 +32,8 @@ export const metadata: Metadata = {
   },
 };
 
+import Script from "next/script";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,6 +42,18 @@ export default function RootLayout({
   return (
     <html lang="zh-TW">
       <body className="antialiased min-h-screen flex flex-col pt-[72px] bg-slate-50 dark:bg-slate-900">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-16935189490"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-16935189490');
+          `}
+        </Script>
         <Header />
         <main className="flex-1 flex flex-col w-full">
           {children}
